@@ -15,4 +15,6 @@ export class Token {
 
 export enum TokenType {
     Unimplemented,
+    Identifier,
+    EOF,
 }
