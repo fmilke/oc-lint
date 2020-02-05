@@ -108,4 +108,16 @@ export class Tokenizer implements ITokenizer {
 
         return false;
     }
+
+    static tokenize(text: string) {
+        return Array.from(new Tokenizer(text));
+    }
+
+    static getValues(text: string) {
+        return this.tokenize(text).map(token => token.value);
+    }
+
+    static getTokenTypes(text: string) {
+        return this.tokenize(text).map(token => token.type);
+    }
 }
