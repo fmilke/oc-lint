@@ -9,6 +9,9 @@ const CC_Z = "Z".charCodeAt(0);
 const CC_z = "z".charCodeAt(0);
 const CC_WHITE_SPACE = " ".charCodeAt(0);
 const CC_EOL = "\n".charCodeAt(0);
+const CC_DOT = ".".charCodeAt(0);
+const CC_COMMA = ",".charCodeAt(0);
+const CC_SEMICOLON = ";".charCodeAt(0);
 
 const NUM_LOWER_LIMIT = "0".charCodeAt(0) - 1;
 const NUM_UPPER_LIMIT = "9".charCodeAt(0) + 1;
@@ -25,9 +28,7 @@ export class Tokenizer implements ITokenizer {
 
     nextToken(): Token {
         var token = this.getToken();
-
         this.pos = token.end;
-        console.log(this.pos);
         return token;
     }
 
@@ -63,6 +64,15 @@ export class Tokenizer implements ITokenizer {
                 return this.readWord()
 
             switch (code) {
+                case CC_DOT:
+                    this.pos++;
+                    return new Token(this.pos - 1, this.pos, TokenType.Dot, ".");
+                case CC_COMMA:
+                    this.pos++;
+                    return new Token(this.pos - 1, this.pos, TokenType.Comma, ",");
+                case CC_SEMICOLON:
+                    this.pos++;
+                    return new Token(this.pos - 1, this.pos, TokenType.Semicolon, ";");
                 case CC_WHITE_SPACE:
                 case CC_EOL:
                     this.skipWhitespace();

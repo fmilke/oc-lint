@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { Tokenizer } from "../../src/impl/Tokenizer";
-import { TokenType } from "../../src/ifaces/ITokenizer";
+import { TokenType as TT } from "../../src/ifaces/ITokenizer";
 
 
 describe('Tokenizer', () => {
@@ -15,13 +15,20 @@ describe('Tokenizer', () => {
         const testString = "Ident1 Ident2";
         const values = Tokenizer.getTokenTypes(testString);
 
-        expect(values).to.eql([TokenType.Identifier, TokenType.Identifier, TokenType.EOF]);
+        expect(values).to.eql([TT.Identifier, TT.Identifier, TT.EOF]);
     });
 
     it('should tokenize punctuation with values', () => {
         const testString = ", . ;";
         const values = Tokenizer.getValues(testString);
 
-        expect(values).to.eql([",", ".", ";"]);
+        expect(values).to.eql([",", ".", ";", "EOF"]);
+    });
+    
+    it('should tokenize punctuation with TokenTypes', () => {
+        const testString = ", . ;";
+        const values = Tokenizer.getTokenTypes(testString);
+
+        expect(values).to.eql([TT.Comma, TT.Dot, TT.Semicolon, TT.EOF]);
     });
 });

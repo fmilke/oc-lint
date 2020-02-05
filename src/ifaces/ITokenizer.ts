@@ -15,6 +15,12 @@ export class Token {
 
 export enum TokenType {
     Unimplemented,
-    Identifier,
     EOF,
+    
+    Identifier,
+    
+    // Punctuation
+    Semicolon,
+    Comma,
+    Dot,
 }
