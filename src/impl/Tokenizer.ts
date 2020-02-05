@@ -17,6 +17,7 @@ export class Tokenizer implements ITokenizer {
 
     private end: number;
     private pos: number = 0;
+    private hasFinished = false;
 
     constructor(private text: string) {
         this.end = text.length;
@@ -31,7 +32,7 @@ export class Tokenizer implements ITokenizer {
     }
 
     hasNext() {
-        return this.pos < this.end;
+        return !this.hasFinished;
     }
 
     *[Symbol.iterator](): Iterator<Token, void> {
@@ -51,8 +52,10 @@ export class Tokenizer implements ITokenizer {
         let token = null;
 
         while (token == null) {
-            if (this.pos >= this.end)
+            if (this.pos >= this.end) {
+                this.hasFinished = true;
                 return new Token(this.pos, this.pos, TokenType.EOF, "EOF");
+            }
 
             let code = this.text.charCodeAt(this.pos);
 
