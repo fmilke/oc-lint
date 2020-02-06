@@ -31,4 +31,11 @@ describe('Tokenizer', () => {
 
         expect(values).to.eql([TT.Comma, TT.Dot, TT.Semicolon, TT.EOF]);
     });
+
+    it('should skip line comments', () => {
+        const testString = "id1 // Comment\n id2";
+        const values = Tokenizer.getValues(testString);
+
+        expect(values).to.eql(["id1", "id2", "EOF"]);
+    });
 });
