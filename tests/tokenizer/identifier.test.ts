@@ -38,4 +38,11 @@ describe('Tokenizer', () => {
 
         expect(values).to.eql(["id1", "id2", "EOF"]);
     });
+
+    it('should skip block comments', () => {
+        const testString = "id1 /* Comment */ id2";
+        const values = Tokenizer.getValues(testString);
+
+        expect(values).to.eql(["id1", "id2", "EOF"]);
+    });
 });

@@ -2,6 +2,7 @@ import { ITokenizer, Token, TokenType } from "../ifaces/ITokenizer";
 
 const CC__ = "_".charCodeAt(0);
 const CC_FORWARD_SLASH = "/".charCodeAt(0);
+const CC_ASTERISK = "*".charCodeAt(0);
 const CC_BACKSLASH = "\\".charCodeAt(0);
 const CC_A = "A".charCodeAt(0);
 const CC_a = "a".charCodeAt(0);
@@ -22,7 +23,7 @@ export class Tokenizer implements ITokenizer {
     private pos: number = 0;
     private hasFinished = false;
 
-    constructor(private text: string) {
+    constructor(private readonly text: string) {
         this.end = text.length;
     }
 
@@ -65,13 +66,18 @@ export class Tokenizer implements ITokenizer {
 
             switch (code) {
                 case CC_FORWARD_SLASH:
-                    if (this.text.charCodeAt(this.pos + 1) == CC_FORWARD_SLASH) {
+                    const nextCode = this.text.charCodeAt(this.pos + 1);
+                    if (nextCode == CC_FORWARD_SLASH) {
                         this.pos += 2;
                         this.skipLineComment();
                     }
+                    else if (nextCode == CC_ASTERISK) {console.log("Block comment start")
+                        this.pos += 2;
+                        this.skipBlockComment();
+                    }
                     else {
                         this.pos++;
-                        return new Token(this.pos - 1, this.pos, TokenType.Identifier, "\\");
+                        return new Token(this.pos - 1, this.pos, TokenType.Identifier, "/");
                     }
                     break;
                 case CC_DOT:
@@ -88,11 +94,18 @@ export class Tokenizer implements ITokenizer {
                     this.skipWhitespace();
                     break;
                 default:
-                    throw new Error(`Unknown charcode: ${code} (${this.text.substr(this.pos, 1)})`)
+                    this.throwInformativeMessage(code, this.pos);
             }
         }
 
         return token;
+    }
+
+    throwInformativeMessage(code: number, pos: number) {
+        const min = Math.max(0, pos - 10);
+        const max = Math.min(pos + 10, this.text.length);
+        const context = this.text.substring(min, max);
+        throw new Error(`Unknown charcode: ${code} (${this.text.substr(this.pos, 1)}) \nin: ${context}`);
     }
 
     skipLineComment() {
@@ -100,6 +113,16 @@ export class Tokenizer implements ITokenizer {
             this.pos++;
         }
         this.pos++;
+    }
+
+    skipBlockComment() {
+        while (
+            this.text.charCodeAt(this.pos) != CC_ASTERISK &&
+            this.text.charCodeAt(this.pos + 1) != CC_FORWARD_SLASH) {
+            this.pos++;
+        }
+
+        this.pos += 2;
     }
 
     skipWhitespace() {
