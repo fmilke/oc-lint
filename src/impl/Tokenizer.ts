@@ -181,7 +181,13 @@ export class Tokenizer implements ITokenizer {
     throwInformativeMessage(code: number, pos: number) {
         const min = Math.max(0, pos - 10);
         const max = Math.min(pos + 10, this.text.length);
-        const context = this.text.substring(min, max);
+
+        const leftString = this.text.substring(min, pos);
+        const middleString = `>>>${this.text.substr(pos, 1)}<<<`;
+        const rightString = this.text.substring(pos, max);
+
+        const context = leftString + middleString + rightString;
+
         throw new Error(`Unknown charcode: ${code} (${this.text.substr(this.pos, 1)}) \nin: ${context}`);
     }
 
