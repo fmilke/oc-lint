@@ -1,6 +1,6 @@
 import { ITokenizer, Token, TokenType } from "../ifaces/ITokenizer";
 
-const CC__ = "_".charCodeAt(0);
+const CC_LOW_LINE = "_".charCodeAt(0);
 const CC_FORWARD_SLASH = "/".charCodeAt(0);
 const CC_ASTERISK = "*".charCodeAt(0);
 const CC_BACKSLASH = "\\".charCodeAt(0);
@@ -62,14 +62,6 @@ export class Tokenizer implements ITokenizer {
     *[Symbol.iterator](): Iterator<Token, void> {
         while (this.hasNext())
             yield this.nextToken();
-    }
-
-    isIdentifierTokenStart(code: number): boolean {
-        if (!(64 < code && code < 91) && // A-Z
-            !(96 < code && code < 123)) // a-z
-            return false;
-        else
-            return true;
     }
 
     getToken() {
@@ -328,9 +320,17 @@ export class Tokenizer implements ITokenizer {
         )
     }
 
+    isIdentifierTokenStart(code: number): boolean {
+        if (!(64 < code && code < 91) && // A-Z
+            !(96 < code && code < 123) && // a-z
+            code != CC_LOW_LINE)
+            return false;
+        else
+            return true;
+    }
+
     isIdentifierCharCode(code: number) {
         if (this.isIdentifierTokenStart(code) ||
-            code == CC__ ||
             (NUM_LOWER_LIMIT < code && code < NUM_UPPER_LIMIT))
             return true;
 
