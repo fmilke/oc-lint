@@ -46,7 +46,7 @@ describe('Tokenizer', () => {
         expect(values).to.eql(["id1", "id2", "EOF"]);
     });
 
-    it('should skip block comments', () => {
+    it('should tokenize arithmetic operators with TokenTypes', () => {
         // Arange
         const arithmeticOperators = [
             "-",
