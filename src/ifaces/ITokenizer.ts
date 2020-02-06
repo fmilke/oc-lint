@@ -19,12 +19,13 @@ export enum TokenType {
     
     Identifier,
     String,
-    
+
     // Punctuation
     Semicolon,
     Comma,
     Dot,
 
     // Operators
-    ArithmicOperator
+    ArithmicOperator,
+    AssignmentOperator,
 }

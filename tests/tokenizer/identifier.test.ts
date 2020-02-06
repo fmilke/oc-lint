@@ -73,4 +73,25 @@ describe('Tokenizer', () => {
 
         expect(values).to.eql([TT.Identifier, TT.String, TT.Identifier, TT.EOF]);
     });
+
+    it('should tokenize assignment operators with TokenTypes', () => {
+        // Arange
+        const assignmentOperators = [
+            "-=",
+            "+=",
+            "%=",
+            "*=",
+            "/=",
+            "=",
+        ];
+        const checkTts = assignmentOperators.map(_ => TT.AssignmentOperator);
+        checkTts.push(TT.EOF);
+        const testString = assignmentOperators.join(" ");
+
+        // Act
+        const tts = Tokenizer.getTokenTypes(testString);
+
+        // Assert
+        expect(tts).to.eql(checkTts);
+    });
 });

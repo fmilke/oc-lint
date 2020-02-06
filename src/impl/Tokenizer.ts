@@ -18,6 +18,7 @@ const CC_MINUS = "-".charCodeAt(0);
 const CC_PRECENTAGE = "%".charCodeAt(0);
 const CC_DOUBLE_QUOTE = '"'.charCodeAt(0);
 const CC_SINGLE_QUOTE = "'".charCodeAt(0);
+const CC_EQL_SIGN = "=".charCodeAt(0);
 
 const NUM_LOWER_LIMIT = "0".charCodeAt(0) - 1;
 const NUM_UPPER_LIMIT = "9".charCodeAt(0) + 1;
@@ -57,6 +58,7 @@ export class Tokenizer implements ITokenizer {
 
     getToken() {
         let token = null;
+        let nextCode: number;
 
         while (token == null) {
             if (this.pos >= this.end) {
@@ -71,7 +73,7 @@ export class Tokenizer implements ITokenizer {
 
             switch (code) {
                 case CC_FORWARD_SLASH:
-                    const nextCode = this.text.charCodeAt(this.pos + 1);
+                    nextCode = this.text.charCodeAt(this.pos + 1);
                     if (nextCode == CC_FORWARD_SLASH) {
                         this.pos += 2;
                         this.skipLineComment();
@@ -79,6 +81,10 @@ export class Tokenizer implements ITokenizer {
                     else if (nextCode == CC_ASTERISK) {
                         this.pos += 2;
                         this.skipBlockComment();
+                    }
+                    else if (nextCode == CC_EQL_SIGN) {
+                        this.pos += 2;
+                        return new Token(this.pos - 2, this.pos, TokenType.AssignmentOperator, "/=");
                     }
                     else {
                         this.pos++;
@@ -97,15 +103,30 @@ export class Tokenizer implements ITokenizer {
                 case CC_SEMICOLON:
                     this.pos++;
                     return new Token(this.pos - 1, this.pos, TokenType.Semicolon, ";");
+                case CC_EQL_SIGN:
+                    this.pos++;
+                    return new Token(this.pos - 1, this.pos, TokenType.AssignmentOperator, "=");
                 case CC_PLUS:
                 case CC_MINUS:
                 case CC_PRECENTAGE:
-                    this.pos++;
-                    return new Token(this.pos - 1, this.pos, TokenType.ArithmicOperator, this.text.substr(this.pos - 1, 1));
-                case CC_ASTERISK:
-                    if (this.text.charCodeAt(this.pos + 1) == CC_ASTERISK) {
+                    nextCode = this.text.charCodeAt(this.pos + 1);
+                    if (nextCode == CC_EQL_SIGN) {
                         this.pos += 2;
-                        return new Token(this.pos - 1, this.pos + 1, TokenType.ArithmicOperator, "**");
+                        return new Token(this.pos - 2, this.pos, TokenType.AssignmentOperator, this.text.substr(this.pos - 2, 2));
+                    }
+                    else {
+                        this.pos++;
+                        return new Token(this.pos - 1, this.pos, TokenType.ArithmicOperator, this.text.substr(this.pos - 1, 1));
+                    }
+                case CC_ASTERISK:
+                    nextCode = this.text.charCodeAt(this.pos + 1);
+                    if (nextCode == CC_ASTERISK) {
+                        this.pos += 2;
+                        return new Token(this.pos - 2, this.pos, TokenType.ArithmicOperator, "**");
+                    }
+                    else if (nextCode == CC_EQL_SIGN) {
+                        this.pos += 2;
+                        return new Token(this.pos - 2, this.pos, TokenType.AssignmentOperator, "*=");
                     }
                     else {
                         this.pos++;
@@ -160,10 +181,10 @@ export class Tokenizer implements ITokenizer {
     }
 
     readString(tokenStart: number) {
-        while(this.text.charCodeAt(this.pos) != CC_DOUBLE_QUOTE) {
+        while (this.text.charCodeAt(this.pos) != CC_DOUBLE_QUOTE) {
             this.pos++;
         }
-        
+
         this.pos++;
 
         return new Token(
