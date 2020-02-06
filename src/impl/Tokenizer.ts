@@ -253,7 +253,7 @@ export class Tokenizer implements ITokenizer {
 
     skipBlockComment() {
         while (
-            this.text.charCodeAt(this.pos) != CC_ASTERISK &&
+            this.text.charCodeAt(this.pos) != CC_ASTERISK ||
             this.text.charCodeAt(this.pos + 1) != CC_FORWARD_SLASH) {
             this.pos++;
         }
@@ -346,8 +346,8 @@ export class Tokenizer implements ITokenizer {
         this.pos++;
 
         let code = this.text.charCodeAt(this.pos);
-        
-        while(this.isNumber(code)) {
+
+        while (this.isNumber(code)) {
             this.pos++;
             code = this.text.charCodeAt(this.pos);
         }

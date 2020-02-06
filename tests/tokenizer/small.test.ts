@@ -53,6 +53,13 @@ describe('Tokenizer', () => {
         expect(values).to.eql(["id1", "id2", "EOF"]);
     });
 
+    it('should skip block comments with double asterisk', () => {
+        const testString = "id1 /** \t@Author \n*/ id2";
+        const values = Tokenizer.getValues(testString);
+
+        expect(values).to.eql(["id1", "id2", "EOF"]);
+    });
+
     it('should tokenize arithmetic operators with TokenTypes', () => {
         // Arange
         const arithmeticOperators = [
