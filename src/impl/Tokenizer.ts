@@ -33,6 +33,7 @@ const CC_Round_Paren_L = "(".charCodeAt(0);
 const CC_Round_Paren_R = ")".charCodeAt(0);
 const CC_Bracket_L = "[".charCodeAt(0);
 const CC_Bracket_R = "]".charCodeAt(0);
+const CC_H_TAB = "\t".charCodeAt(0);
 
 const NUM_LOWER_LIMIT = "0".charCodeAt(0) - 1;
 const NUM_UPPER_LIMIT = "9".charCodeAt(0) + 1;
@@ -213,6 +214,7 @@ export class Tokenizer implements ITokenizer {
                     }
                 case CC_WHITE_SPACE:
                 case CC_LINEFEED:
+                case CC_H_TAB:
                     this.skipWhitespace();
                     break;
                 case CC_QUESTION_MARK:
