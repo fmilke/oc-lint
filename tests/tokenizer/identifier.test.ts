@@ -158,4 +158,24 @@ describe('Tokenizer', () => {
         expect(tts).to.eql(checkTts);
     });
 
+    it('should tokenize logical operators with TokenTypes', () => {
+        // Arange
+        const logicalOperators = [
+            "||",
+            "&&",
+            "!",
+            "!=",
+            "==",
+        ];
+
+        const checkTts = logicalOperators.map(_ => TT.LogicalOperator);
+        checkTts.push(TT.EOF);
+        const testString = logicalOperators.join(" ");
+
+        // Act
+        const tts = Tokenizer.getTokenTypes(testString);
+        // Assert
+        expect(tts).to.eql(checkTts);
+    });
+
 });
