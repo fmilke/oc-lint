@@ -31,4 +31,12 @@ export enum TokenType {
     BitwiseOperator,
     LogicalOperator,
     NilCaseOperator,
+
+    // Parentheses
+    Curly_Paren_L,
+    Curly_Paren_R,
+    Round_Paren_L,
+    Round_Paren_R,
+    Bracket_L,
+    Bracket_R,
 }

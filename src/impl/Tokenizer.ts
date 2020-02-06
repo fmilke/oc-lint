@@ -27,6 +27,12 @@ const CC_AMPERSAND = "&".charCodeAt(0);
 const CC_CIRCUMFLEX = "^".charCodeAt(0);
 const CC_EXCLAMATION_MARK = "!".charCodeAt(0);
 const CC_QUESTION_MARK = "?".charCodeAt(0);
+const CC_Curly_Paren_L = "{".charCodeAt(0);
+const CC_Curly_Paren_R = "}".charCodeAt(0);
+const CC_Round_Paren_L = "(".charCodeAt(0);
+const CC_Round_Paren_R = ")".charCodeAt(0);
+const CC_Bracket_L = "[".charCodeAt(0);
+const CC_Bracket_R = "]".charCodeAt(0);
 
 const NUM_LOWER_LIMIT = "0".charCodeAt(0) - 1;
 const NUM_UPPER_LIMIT = "9".charCodeAt(0) + 1;
@@ -80,6 +86,24 @@ export class Tokenizer implements ITokenizer {
                 return this.readWord()
 
             switch (code) {
+                case CC_Round_Paren_L:
+                    this.pos++;
+                    return new Token(this.pos - 1, this.pos, TokenType.Round_Paren_L, "(");
+                case CC_Round_Paren_R:
+                    this.pos++;
+                    return new Token(this.pos - 1, this.pos, TokenType.Round_Paren_R, ")");
+                case CC_Curly_Paren_L:
+                    this.pos++;
+                    return new Token(this.pos - 1, this.pos, TokenType.Curly_Paren_L, "{");
+                case CC_Curly_Paren_R:
+                    this.pos++;
+                    return new Token(this.pos - 1, this.pos, TokenType.Curly_Paren_R, "}");
+                case CC_Bracket_L:
+                    this.pos++;
+                    return new Token(this.pos - 1, this.pos, TokenType.Bracket_L, "[");
+                case CC_Bracket_R:
+                    this.pos++;
+                    return new Token(this.pos - 1, this.pos, TokenType.Bracket_R, "]");
                 case CC_FORWARD_SLASH:
                     nextCode = this.text.charCodeAt(this.pos + 1);
                     if (nextCode == CC_FORWARD_SLASH) {

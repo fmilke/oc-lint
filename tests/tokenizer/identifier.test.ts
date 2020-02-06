@@ -186,4 +186,29 @@ describe('Tokenizer', () => {
         // Assert
         expect(tts).to.eql([TT.NilCaseOperator, TT.EOF]);
     });
+
+
+    it('should tokenize parentheses with values', () => {
+        const testString = "([{}])";
+        const values = Tokenizer.getValues(testString);
+
+        expect(values).to.eql(["(", "[", "{", "}", "]", ")", "EOF"]);
+    });
+
+    it('should tokenize parenthesis with TokenType', () => {
+        const testString = "([{}])";
+        const values = Tokenizer.getTokenTypes(testString);
+
+        const checkTts = [
+            TT.Round_Paren_L,
+            TT.Bracket_L,
+            TT.Curly_Paren_L,
+            TT.Curly_Paren_R,
+            TT.Bracket_R,
+            TT.Round_Paren_R,
+            TT.EOF
+        ];
+
+        expect(values).to.eql(checkTts);
+    });
 });
