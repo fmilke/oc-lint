@@ -135,4 +135,27 @@ describe('Tokenizer', () => {
 
         expect(() => Tokenizer.tokenize(operators.join(" "))).to.not.throw();
     });
+
+    it('should tokenize bitwise operators with TokenTypes', () => {
+        // Arange
+        const assignmentOperators = [
+            "<<",
+            ">>",
+            "&",
+            "|",
+            "^",
+            "~",
+        ];
+
+        const checkTts = assignmentOperators.map(_ => TT.BitwiseOperator);
+        checkTts.push(TT.EOF);
+        const testString = assignmentOperators.join(" ");
+
+        // Act
+        const tts = Tokenizer.getTokenTypes(testString);
+
+        // Assert
+        expect(tts).to.eql(checkTts);
+    });
+
 });

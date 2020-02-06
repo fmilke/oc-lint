@@ -19,6 +19,12 @@ const CC_PRECENTAGE = "%".charCodeAt(0);
 const CC_DOUBLE_QUOTE = '"'.charCodeAt(0);
 const CC_SINGLE_QUOTE = "'".charCodeAt(0);
 const CC_EQL_SIGN = "=".charCodeAt(0);
+const CC_LT_SIGN = "<".charCodeAt(0);
+const CC_GT_SIGN = ">".charCodeAt(0);
+const CC_TILDE = "~".charCodeAt(0);
+const CC_VERT_LINE = "|".charCodeAt(0);
+const CC_AMPERSAND = "&".charCodeAt(0);
+const CC_CIRCUMFLEX = "^".charCodeAt(0);
 
 const NUM_LOWER_LIMIT = "0".charCodeAt(0) - 1;
 const NUM_UPPER_LIMIT = "9".charCodeAt(0) + 1;
@@ -132,6 +138,34 @@ export class Tokenizer implements ITokenizer {
                         this.pos++;
                         return new Token(this.pos - 1, this.pos, TokenType.ArithmicOperator, "*");
                     }
+                case CC_LT_SIGN:
+                case CC_GT_SIGN:
+                    nextCode = this.text.charCodeAt(this.pos + 1);
+                    if (nextCode == code) {
+                        this.pos += 2;
+                        return new Token(this.pos - 2, this.pos, TokenType.BitwiseOperator, this.text.substr(this.pos - 2, 2));
+                    }
+                    else {
+                        this.pos++;
+                        return new Token(this.pos - 1, this.pos, TokenType.Unimplemented, this.text.substr(this.pos - 1, 1));
+                    }
+                case CC_AMPERSAND:
+                case CC_VERT_LINE:
+                    nextCode = this.text.charCodeAt(this.pos + 1);
+                    if (nextCode == code) {
+                        this.pos += 2;
+                        return new Token(this.pos - 2, this.pos, TokenType.Unimplemented, this.text.substr(this.pos - 2, 2));
+                    }
+                    else {
+                        this.pos++;
+                        return new Token(this.pos - 1, this.pos, TokenType.BitwiseOperator, this.text.substr(this.pos - 1, 1));
+                    }
+                case CC_TILDE:
+                    this.pos++;
+                    return new Token(this.pos - 1, this.pos, TokenType.BitwiseOperator, "~");
+                case CC_CIRCUMFLEX:
+                    this.pos++;
+                    return new Token(this.pos - 1, this.pos, TokenType.BitwiseOperator, "^");
                 case CC_WHITE_SPACE:
                 case CC_LINEFEED:
                     this.skipWhitespace();

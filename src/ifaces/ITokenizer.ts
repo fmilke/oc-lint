@@ -28,4 +28,5 @@ export enum TokenType {
     // Operators
     ArithmicOperator,
     AssignmentOperator,
+    BitwiseOperator,
 }
