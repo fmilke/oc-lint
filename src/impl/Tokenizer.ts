@@ -204,7 +204,7 @@ export class Tokenizer implements ITokenizer {
 
         const leftString = this.text.substring(min, pos);
         const middleString = `>>>${this.text.substr(pos, 1)}<<<`;
-        const rightString = this.text.substring(pos, max);
+        const rightString = this.text.substring(pos + 1, max);
 
         const context = leftString + middleString + rightString;
 
