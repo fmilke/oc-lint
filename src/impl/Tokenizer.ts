@@ -34,6 +34,7 @@ const CC_Round_Paren_R = ")".charCodeAt(0);
 const CC_Bracket_L = "[".charCodeAt(0);
 const CC_Bracket_R = "]".charCodeAt(0);
 const CC_H_TAB = "\t".charCodeAt(0);
+const CC_HASH = "#".charCodeAt(0);
 
 const NUM_LOWER_LIMIT = "0".charCodeAt(0) - 1;
 const NUM_UPPER_LIMIT = "9".charCodeAt(0) + 1;
@@ -212,6 +213,9 @@ export class Tokenizer implements ITokenizer {
                         this.pos++;
                         return new Token(this.pos - 1, this.pos, TokenType.LogicalOperator, "!");
                     }
+                case CC_HASH:
+                    this.pos++;
+                    return this.readHashIdentifier();
                 case CC_WHITE_SPACE:
                 case CC_LINEFEED:
                 case CC_H_TAB:
@@ -286,6 +290,22 @@ export class Tokenizer implements ITokenizer {
             this.pos,
             TokenType.String,
             this.text.substring(tokenStart, this.pos)
+        )
+    }
+
+    readHashIdentifier() {
+        const tokenStart = this.pos;
+        let currentPos = tokenStart + 1;
+
+        while (this.isIdentifierCharCode(this.text.charCodeAt(currentPos))) {
+            currentPos++;
+        }
+
+        return new Token(
+            tokenStart,
+            currentPos,
+            TokenType.HashIdentifier,
+            "#" + this.text.substring(tokenStart, currentPos)
         )
     }
 

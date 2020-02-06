@@ -218,4 +218,18 @@ describe('Tokenizer', () => {
 
         expect(values).to.eql(checkTts);
     });
+
+    it('should tokenize hash-identifiers with values', () => {
+        const testString = "#include Clonk";
+        const values = Tokenizer.getValues(testString);
+
+        expect(values).to.eql(["#include", "Clonk", "EOF"]);
+    });
+
+    it('should tokenize hash-identifiers with TokenType', () => {
+        const testString = "#include Clonk";
+        const values = Tokenizer.getTokenTypes(testString);
+
+        expect(values).to.eql([TT.HashIdentifier, TT.Identifier, TT.EOF]);
+    });
 });

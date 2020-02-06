@@ -18,6 +18,7 @@ export enum TokenType {
     EOF,
     
     Identifier,
+    HashIdentifier,
     String,
 
     // Punctuation
