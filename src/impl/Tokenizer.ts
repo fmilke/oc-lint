@@ -1,14 +1,14 @@
 import { ITokenizer, Token, TokenType } from "../ifaces/ITokenizer";
-import { DocumentString } from "../DocumentString";
 
 const CC__ = "_".charCodeAt(0);
-const CC_SLASH = "\\".charCodeAt(0);
+const CC_FORWARD_SLASH = "/".charCodeAt(0);
+const CC_BACKSLASH = "\\".charCodeAt(0);
 const CC_A = "A".charCodeAt(0);
 const CC_a = "a".charCodeAt(0);
 const CC_Z = "Z".charCodeAt(0);
 const CC_z = "z".charCodeAt(0);
 const CC_WHITE_SPACE = " ".charCodeAt(0);
-const CC_EOL = "\n".charCodeAt(0);
+const CC_LINEFEED = "\n".charCodeAt(0);
 const CC_DOT = ".".charCodeAt(0);
 const CC_COMMA = ",".charCodeAt(0);
 const CC_SEMICOLON = ";".charCodeAt(0);
@@ -64,6 +64,16 @@ export class Tokenizer implements ITokenizer {
                 return this.readWord()
 
             switch (code) {
+                case CC_FORWARD_SLASH:
+                    if (this.text.charCodeAt(this.pos + 1) == CC_FORWARD_SLASH) {
+                        this.pos += 2;
+                        this.skipLineComment();
+                    }
+                    else {
+                        this.pos++;
+                        return new Token(this.pos - 1, this.pos, TokenType.Identifier, "\\");
+                    }
+                    break;
                 case CC_DOT:
                     this.pos++;
                     return new Token(this.pos - 1, this.pos, TokenType.Dot, ".");
@@ -74,22 +84,29 @@ export class Tokenizer implements ITokenizer {
                     this.pos++;
                     return new Token(this.pos - 1, this.pos, TokenType.Semicolon, ";");
                 case CC_WHITE_SPACE:
-                case CC_EOL:
+                case CC_LINEFEED:
                     this.skipWhitespace();
                     break;
                 default:
-                    throw new Error(`Unknown charcode: ${code}`)
+                    throw new Error(`Unknown charcode: ${code} (${this.text.substr(this.pos, 1)})`)
             }
         }
 
         return token;
     }
 
+    skipLineComment() {
+        while (this.text.charCodeAt(this.pos) !== CC_LINEFEED) {
+            this.pos++;
+        }
+        this.pos++;
+    }
+
     skipWhitespace() {
         let currentPos = this.pos + 1;
         let charCode = this.text.charCodeAt(currentPos);
         while (charCode == CC_WHITE_SPACE ||
-            charCode == CC_EOL) {
+            charCode == CC_LINEFEED) {
             currentPos++;
             charCode = this.text.charCodeAt(currentPos);
         }
