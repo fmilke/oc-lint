@@ -87,6 +87,9 @@ export class Tokenizer implements ITokenizer {
             if (this.isIdentifierTokenStart(code))
                 return this.readWord()
 
+            if (this.isNumber(code))
+                return this.readNumber();
+
             switch (code) {
                 case CC_Round_Paren_L:
                     this.pos++;
@@ -332,6 +335,29 @@ export class Tokenizer implements ITokenizer {
             return true;
 
         return false;
+    }
+
+    isNumber(code: number) {
+        return NUM_LOWER_LIMIT < code && code < NUM_UPPER_LIMIT;
+    }
+
+    readNumber() {
+        const tokenStart = this.pos;
+        this.pos++;
+
+        let code = this.text.charCodeAt(this.pos);
+        
+        while(this.isNumber(code)) {
+            this.pos++;
+            code = this.text.charCodeAt(this.pos);
+        }
+
+        return new Token(
+            tokenStart,
+            this.pos,
+            TokenType.Number,
+            this.text.substring(tokenStart, this.pos)
+        );
     }
 
     static tokenize(text: string) {

@@ -5,7 +5,7 @@ import { Tokenizer } from "../../src/impl/Tokenizer";
 describe('Tokenizer', () => {
     it('should tokenize not throw with bat script', () => {
 
-        const testString = `/**
+        const testString = `/*
 	Bat
 	Flutters around at night and in caves. The bat heals itself by
 	biting prey animals or clonks. The less energy it has, the more

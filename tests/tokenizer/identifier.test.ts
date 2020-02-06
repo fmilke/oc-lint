@@ -232,4 +232,18 @@ describe('Tokenizer', () => {
 
         expect(values).to.eql([TT.HashIdentifier, TT.Identifier, TT.EOF]);
     });
+
+    it('should tokenize numbers with values', () => {
+        const testString = "12 42";
+        const values = Tokenizer.getValues(testString);
+
+        expect(values).to.eql(["12", "42", "EOF"]);
+    });
+
+    it('should tokenize numbers with TokenType', () => {
+        const testString = "12 42";
+        const values = Tokenizer.getTokenTypes(testString);
+
+        expect(values).to.eql([TT.Number, TT.Number, TT.EOF]);
+    });
 });

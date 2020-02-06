@@ -20,6 +20,7 @@ export enum TokenType {
     Identifier,
     HashIdentifier,
     String,
+    Number,
 
     // Punctuation
     Semicolon,
