@@ -30,4 +30,5 @@ export enum TokenType {
     AssignmentOperator,
     BitwiseOperator,
     LogicalOperator,
+    NilCaseOperator,
 }

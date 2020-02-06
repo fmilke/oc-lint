@@ -26,6 +26,7 @@ const CC_VERT_LINE = "|".charCodeAt(0);
 const CC_AMPERSAND = "&".charCodeAt(0);
 const CC_CIRCUMFLEX = "^".charCodeAt(0);
 const CC_EXCLAMATION_MARK = "!".charCodeAt(0);
+const CC_QUESTION_MARK = "?".charCodeAt(0);
 
 const NUM_LOWER_LIMIT = "0".charCodeAt(0) - 1;
 const NUM_UPPER_LIMIT = "9".charCodeAt(0) + 1;
@@ -190,6 +191,13 @@ export class Tokenizer implements ITokenizer {
                 case CC_LINEFEED:
                     this.skipWhitespace();
                     break;
+                case CC_QUESTION_MARK:
+                    if (this.text.charCodeAt(this.pos + 1) == CC_QUESTION_MARK) {
+                        this.pos += 2;
+                        return new Token(this.pos - 2, this.pos, TokenType.NilCaseOperator, "??");
+                    }
+                    else
+                        this.throwInformativeMessage(code, this.pos);
                 default:
                     this.throwInformativeMessage(code, this.pos);
             }

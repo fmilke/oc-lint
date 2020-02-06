@@ -178,4 +178,12 @@ describe('Tokenizer', () => {
         expect(tts).to.eql(checkTts);
     });
 
+    it('should tokenize nil operator with TokenTypes', () => {
+        // Arange
+
+        // Act
+        const tts = Tokenizer.getTokenTypes("??");
+        // Assert
+        expect(tts).to.eql([TT.NilCaseOperator, TT.EOF]);
+    });
 });
