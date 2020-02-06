@@ -45,4 +45,25 @@ describe('Tokenizer', () => {
 
         expect(values).to.eql(["id1", "id2", "EOF"]);
     });
+
+    it('should skip block comments', () => {
+        // Arange
+        const arithmeticOperators = [
+            "-",
+            "+",
+            "%",
+            "*",
+            "/",
+            "**",
+        ];
+        const checkTts = arithmeticOperators.map(_ => TT.ArithmicOperator);
+        checkTts.push(TT.EOF);
+        const testString = arithmeticOperators.join(" ");
+
+        // Act
+        const tts = Tokenizer.getTokenTypes(testString);
+
+        // Assert
+        expect(tts).to.eql(checkTts);
+    });
 });

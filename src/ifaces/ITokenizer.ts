@@ -23,4 +23,7 @@ export enum TokenType {
     Semicolon,
     Comma,
     Dot,
+
+    // Operators
+    ArithmicOperator
 }

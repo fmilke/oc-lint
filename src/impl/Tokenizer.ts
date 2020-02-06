@@ -13,6 +13,9 @@ const CC_LINEFEED = "\n".charCodeAt(0);
 const CC_DOT = ".".charCodeAt(0);
 const CC_COMMA = ",".charCodeAt(0);
 const CC_SEMICOLON = ";".charCodeAt(0);
+const CC_PLUS = "+".charCodeAt(0);
+const CC_MINUS = "-".charCodeAt(0);
+const CC_PRECENTAGE = "%".charCodeAt(0);
 
 const NUM_LOWER_LIMIT = "0".charCodeAt(0) - 1;
 const NUM_UPPER_LIMIT = "9".charCodeAt(0) + 1;
@@ -71,13 +74,13 @@ export class Tokenizer implements ITokenizer {
                         this.pos += 2;
                         this.skipLineComment();
                     }
-                    else if (nextCode == CC_ASTERISK) {console.log("Block comment start")
+                    else if (nextCode == CC_ASTERISK) {
                         this.pos += 2;
                         this.skipBlockComment();
                     }
                     else {
                         this.pos++;
-                        return new Token(this.pos - 1, this.pos, TokenType.Identifier, "/");
+                        return new Token(this.pos - 1, this.pos, TokenType.ArithmicOperator, "/");
                     }
                     break;
                 case CC_DOT:
@@ -89,6 +92,20 @@ export class Tokenizer implements ITokenizer {
                 case CC_SEMICOLON:
                     this.pos++;
                     return new Token(this.pos - 1, this.pos, TokenType.Semicolon, ";");
+                case CC_PLUS:
+                case CC_MINUS:
+                case CC_PRECENTAGE:
+                    this.pos++;
+                    return new Token(this.pos - 1, this.pos, TokenType.ArithmicOperator, this.text.substr(this.pos - 1, 1));
+                case CC_ASTERISK:
+                    if (this.text.charCodeAt(this.pos + 1) == CC_ASTERISK) {
+                        this.pos += 2;
+                        return new Token(this.pos - 1, this.pos + 1, TokenType.ArithmicOperator, "**");
+                    }
+                    else {
+                        this.pos++;
+                        return new Token(this.pos - 1, this.pos, TokenType.ArithmicOperator, "*");
+                    }
                 case CC_WHITE_SPACE:
                 case CC_LINEFEED:
                     this.skipWhitespace();
