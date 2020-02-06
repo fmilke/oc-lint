@@ -24,7 +24,7 @@ describe('Tokenizer', () => {
 
         expect(values).to.eql([",", ".", ";", "EOF"]);
     });
-    
+
     it('should tokenize punctuation with TokenTypes', () => {
         const testString = ", . ;";
         const values = Tokenizer.getTokenTypes(testString);
@@ -93,5 +93,46 @@ describe('Tokenizer', () => {
 
         // Assert
         expect(tts).to.eql(checkTts);
+    });
+
+    it('should tokenize all operators', () => {
+        const operators = [
+            "++",
+            "--",
+            "~",
+            "!",
+            "+",
+            "-",
+            "++",
+            "--",
+            "**",
+            "/",
+            "*",
+            "%",
+            "-",
+            "+",
+            "<<",
+            ">>",
+            "<",
+            "<=",
+            ">",
+            ">=",
+            "==",
+            "!=",
+            "&",
+            "^",
+            "|",
+            "&&",
+            "||",
+            "??",
+            "*=",
+            "/=",
+            "%=",
+            "+=",
+            "-=",
+            "=",
+        ];
+
+        expect(() => Tokenizer.tokenize(operators.join(" "))).to.not.throw();
     });
 });
