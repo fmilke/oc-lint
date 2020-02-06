@@ -66,4 +66,11 @@ describe('Tokenizer', () => {
         // Assert
         expect(tts).to.eql(checkTts);
     });
+
+    it('should tokenize string with TokenTypes', () => {
+        const testString = 'id1"SomeString"  id2';
+        const values = Tokenizer.getTokenTypes(testString);
+
+        expect(values).to.eql([TT.Identifier, TT.String, TT.Identifier, TT.EOF]);
+    });
 });

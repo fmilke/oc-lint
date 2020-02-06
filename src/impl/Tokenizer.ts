@@ -16,6 +16,8 @@ const CC_SEMICOLON = ";".charCodeAt(0);
 const CC_PLUS = "+".charCodeAt(0);
 const CC_MINUS = "-".charCodeAt(0);
 const CC_PRECENTAGE = "%".charCodeAt(0);
+const CC_DOUBLE_QUOTE = '"'.charCodeAt(0);
+const CC_SINGLE_QUOTE = "'".charCodeAt(0);
 
 const NUM_LOWER_LIMIT = "0".charCodeAt(0) - 1;
 const NUM_UPPER_LIMIT = "9".charCodeAt(0) + 1;
@@ -83,6 +85,9 @@ export class Tokenizer implements ITokenizer {
                         return new Token(this.pos - 1, this.pos, TokenType.ArithmicOperator, "/");
                     }
                     break;
+                case CC_DOUBLE_QUOTE:
+                    this.pos++;
+                    return this.readString(this.pos - 1);
                 case CC_DOT:
                     this.pos++;
                     return new Token(this.pos - 1, this.pos, TokenType.Dot, ".");
@@ -152,6 +157,21 @@ export class Tokenizer implements ITokenizer {
         }
 
         this.pos = currentPos;
+    }
+
+    readString(tokenStart: number) {
+        while(this.text.charCodeAt(this.pos) != CC_DOUBLE_QUOTE) {
+            this.pos++;
+        }
+        
+        this.pos++;
+
+        return new Token(
+            tokenStart,
+            this.pos,
+            TokenType.String,
+            this.text.substring(tokenStart, this.pos)
+        )
     }
 
     readWord() {
