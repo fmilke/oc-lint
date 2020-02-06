@@ -3,7 +3,7 @@ import { Tokenizer } from "../../src/impl/Tokenizer";
 
 
 describe('Tokenizer', () => {
-    it('should tokenize not throw with bat script', () => {
+    it('should not throw tokenizing bat script', () => {
 
         const testString = `/*
 	Bat
