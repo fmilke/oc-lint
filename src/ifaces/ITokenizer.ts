@@ -1,7 +1,6 @@
 export interface ITokenizer {
     nextToken(): Token;
-    // [Symbol.iterator](): Token;
-    // [Symbol.iterator](): Generator<Token, void, void>;
+    [Symbol.iterator](): Iterator<Token, void>;
 }
 
 export class Token {
