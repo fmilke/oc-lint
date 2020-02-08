@@ -15,6 +15,7 @@ export class Token {
 export enum TokenType {
     Unimplemented,
     EOF,
+    Root,
     
     Identifier,
     HashIdentifier,
