@@ -13,7 +13,7 @@ export class ParseTreeBuilder implements IParseTreeBuilder {
         let currentNode = root;
         let domainNode = root;
 
-        const domainStack = [root];
+        const n = [root];
 
         for (let token of this.tokenizer) {
             switch (token.type) {

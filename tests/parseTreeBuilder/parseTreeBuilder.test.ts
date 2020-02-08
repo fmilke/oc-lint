@@ -7,8 +7,8 @@ describe('ParseTreeBuilder', () => {
     it('should not throw for any TokenType except NotImplemented', () => {
         // Arrange
         const tokens = Object.keys(TT)
-            .filter(key => typeof TT[key as any] === "number" && key !== "Unimplemented")
-            .map(key => new Token(0, 0, TT[key], ""));
+            .filter(key => typeof TT[key as keyof typeof TT] === "number" && key !== "Unimplemented")
+            .map((key: string) => new Token(0, 0, TT[key as keyof typeof TT], ""));
 
         const tokenizer = new ITokenizerMock(tokens);
         
