@@ -1,36 +1,39 @@
 import { IParseTreeBuilder, ParseTreeNode } from "../ifaces/IParserTreeBuilder";
 import { ITokenizer, TokenType, Token } from "../ifaces/ITokenizer";
 import { UnreachableCaseError } from "../errors";
+import { notDeepEqual } from "assert";
 
 
 export class ParseTreeBuilder implements IParseTreeBuilder {
-    constructor(private tokenizer: ITokenizer) {}
+
+    private root = new ParseTreeNode(new Token(0, 0, TokenType.Root, "root"));
+    private currentNode = this.root;
+    private domainNode = this.root;
+    private domainStack = [this.root];
+
+    constructor(private tokenizer: ITokenizer) { }
 
     tokensToParseTree(): ParseTreeNode {
-
-        const rootToken = new Token(0, 0, TokenType.Root, "");
-        const root = new ParseTreeNode(rootToken);
-        let currentNode = root;
-        let domainNode = root;
-
-        const n = [root];
+        let childNode;
 
         for (let token of this.tokenizer) {
             switch (token.type) {
                 case TokenType.Dot:
-                    currentNode = this.pushToNode(token, currentNode);
+                    this.addToCurrent(token);
                     break;
                 case TokenType.Identifier:
-                    currentNode = this.pushToNode(token, currentNode);
+                    childNode = this.addToCurrent(token);
+                    this.setDomain(childNode)
                     break;
+                case TokenType.Semicolon:
                 case TokenType.Comma:
-                    this.pushToNode(token, domainNode);
-                    currentNode = domainNode;
+                    this.switchToDomain();
+                    childNode = this.addToCurrent(token);
                     break;
                 case TokenType.Curly_Paren_L:
                 case TokenType.Bracket_L:
                 case TokenType.Round_Paren_L:
-                    currentNode = domainNode = this.pushToNode(token, currentNode);
+                    this.addToCurrent(token);
                     break;
                 case TokenType.Curly_Paren_R:
                 case TokenType.Bracket_R:
@@ -44,30 +47,38 @@ export class ParseTreeBuilder implements IParseTreeBuilder {
                 case TokenType.LogicalOperator:
                 case TokenType.HashIdentifier:
                 case TokenType.EOF:
+                    break
                 case TokenType.Number:
                 case TokenType.String:
-                case TokenType.Semicolon:
+                    this.addToCurrent(token);
+                    break;
                 case TokenType.Root:
                     break
                 case TokenType.Unimplemented:
                     throw new Error(`TokenType is 'Unimplemented' for ${token.value}`);
                 default:
-                    console.log("Unimplemented: " + token.type);
-                //     throw new UnreachableCaseError(token);
+                    throw new Error(`TokenType is unmatched in switch statement for ${token.value}`);
             }
         }
 
-        return root;
+        return this.root;
     }
 
-    private pushToNode(token: Token, node: ParseTreeNode) {
-        const childNode = new ParseTreeNode(token);
-        if (node.children == null) {
-            node.children = [childNode];
-        }
-        else
-            node.children.push(childNode);
+    private createNodeFromToken(token: Token) {
+        return new ParseTreeNode(token);
+    }
 
+    private switchToDomain() {
+        this.currentNode = this.domainNode;
+    }
+
+    private setDomain(node: ParseTreeNode) {
+        this.domainNode = node;
+    }
+
+    private addToCurrent(token: Token) {
+        const node = this.createNodeFromToken(token);
+        this.currentNode.appendChild(node);
         return node;
     }
 }
