@@ -1,5 +1,5 @@
 {
-    "name": "Hash Identifier",
+    "name": "Global variables",
     "scope": "root",
     "target": "static Asd; local clonk = Clonk",
     "expected": {
