@@ -5,7 +5,6 @@ import { Tokenizer } from '../../src/impl/Tokenizer';
 import { ASTBuilder } from '../../src/impl/ASTBuilder';
 import { Parser } from '../../src/impl/Parser';
 import { DiagnosticsCache } from '../../src/impl/DiagnosticsCache';
-import { ASTNode } from '../../src/model/ASTNode';
 
 describe('Parser', () => {
     const targetDir = './tests/parser/ast_values';
@@ -24,7 +23,7 @@ describe('Parser', () => {
             const diagCache = new DiagnosticsCache();
             new Parser(tokenizer, builder, diagCache).parse();
             const ast = builder.getAST();
-            
+
             expect(ast.toTestObject()).to.eql(parsed.expected);
         });
     }
