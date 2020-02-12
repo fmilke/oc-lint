@@ -22,7 +22,7 @@ describe('Parser', () => {
             const builder = new ASTBuilder();
             const diagCache = new DiagnosticsCache();
             new Parser(tokenizer, builder, diagCache).parse();
-            const ast = builder.getAST();
+            const ast = builder.getRoot();
 
             expect(ast.toTestObject()).to.eql(parsed.expected);
         });

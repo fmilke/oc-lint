@@ -1,16 +1,5 @@
 import { Token, TokenType } from "../ifaces/ITokenizer";
 
-interface ValueTreeResult {
-    value: string,
-    children: ValueTreeResult[],
-}
-
-// interface IASTNode {
-//     appendChild(node: ASTNode): void;
-
-//     toTestObject(): any;
-// }
-
 export class ASTNode {
     children: ASTNode[] = [];
 
@@ -42,17 +31,51 @@ export class ASTNode {
     }
 }
 
-export class ASTMethodNode extends ASTNode {
+export class ASTLeaf {
+    constructor(protected token: Token) { }
+    toTestObject(): any {
+        return this.token.value;
+    }
+}
 
-    private parameters: ASTNode[] = [];
-    private modifier: ASTNode | null = null;
-
-    setParameters(nodes: ASTNode[]) {
-        this.parameters = nodes;
+export class ASTParameterLeaf extends ASTLeaf {
+    constructor(protected identToken: Token, private typeToken?: Token) {
+        super(identToken);
     }
 
-    setModifier(modifier: ASTNode | null) {
-        this.modifier = modifier;
+    toTestObject() {
+        return {
+            name: this.identToken.value,
+            type: this.typeToken ? this.typeToken.value : null,
+        }
+    }
+}
+
+export class ASTMethodNode extends ASTNode {
+    private parameters: ASTParameterLeaf[] = [];
+    private modifier: ASTLeaf | null = null;
+    constructor() {
+        super(new Token(0, 0, TokenType.Identifier, ""));
+    }
+
+    setMethodName(token: Token) {
+        this.token = token;
+    }
+
+    addParameter(identToken: Token) {
+        this.parameters.push(new ASTParameterLeaf(identToken));
+    }
+
+    addParameterWithType(typeToken: Token, identToken: Token) {
+        this.parameters.push(new ASTParameterLeaf(identToken, typeToken));
+    }
+
+    setModifier(modifierToken: Token | null) {
+        this.modifier = modifierToken === null ? null : new ASTLeaf(modifierToken);
+    }
+
+    hasMethodName() {
+        return this.token.value !== "";
     }
 
     toTestObject() {

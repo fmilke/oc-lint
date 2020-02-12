@@ -5,14 +5,10 @@
     "expected": {
         "value": "root",
         "children": [{
-            "value": "func",
-            "name": "Method",
-            "modifier": "global",
+            "value": "Method",
+            "modifier": "public",
             "parameters": [],
-            "children": [{
-                "value": "Clonk",
-                "children": []
-            }]
+            "children": []
         }]
     }
 }

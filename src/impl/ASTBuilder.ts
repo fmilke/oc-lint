@@ -1,5 +1,5 @@
 import { Token, TokenType } from "../ifaces/ITokenizer";
-import { ASTNode } from "../model/ASTNode";
+import { ASTNode, ASTMethodNode } from "../model/ASTNode";
 
 export enum Scope {
     Expression,
@@ -12,7 +12,23 @@ export class ASTBuilder {
     private scope = Scope.Root;
     private stack: ASTNode[] = [this.root];
 
-    constructor() { }
+    addToStack(node: ASTNode) {
+        this.stack.push(node);
+        this.current = node;
+    }
+
+    popFromStack() {
+        this.stack.pop();
+        this.current = this.stack[this.stack.length - 1];
+    }
+
+    getRoot() {
+        return this.root;
+    }
+
+    addNode(token: Token) {
+        this.current.appendChild(ASTNode.fromToken(token));
+    }
 
     addHashIdentifierNode(hashIdentToken: Token, identToken: Token) {
         this.current.appendChild(
@@ -30,29 +46,39 @@ export class ASTBuilder {
         modifierToken: Token,
         identToken: Token,
     ) {
-        console.log(this.current);
         const node = ASTNode.fromTokenWithChild(modifierToken, identToken);
         this.current.appendChild(node);
-        console.log(this.current);
         this.addToStack(node);
-        console.log(this.current);
     }
 
-    addNode(token: Token) {
-        this.current.appendChild(ASTNode.fromToken(token));
+    startMethodNode(modifierToken: Token | null) {
+        const node = new ASTMethodNode();
+        if (modifierToken !== null)
+            node.setModifier(modifierToken);
+        this.current.appendChild(node);
+        this.addToStack(node);
+
+        return new ASTMethodNodeHandle(node);
+    }
+}
+
+export class ASTMethodNodeHandle {
+    constructor(private node: ASTMethodNode) { }
+
+    setMethodName(token: Token) {
+        if (this.node.hasMethodName())
+            return false;
+        else {
+            this.node.setMethodName(token);
+            return true;
+        }
     }
 
-    addToStack(node: ASTNode) {
-        this.stack.push(node);
-        this.current = node;
+    addParameter(token: Token) {
+        this.node.addParameter(token);
     }
 
-    popFromStack() {
-        this.stack.pop();
-        this.current = this.stack[this.stack.length - 1];
-    }
-
-    getAST() {
-        return this.root;
+    addParameterWithType(typeToken: Token, identToken: Token) {
+        this.node.addParameterWithType(typeToken, identToken);
     }
 }
