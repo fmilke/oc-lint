@@ -24,9 +24,8 @@ describe('Parser', () => {
             const diagCache = new DiagnosticsCache();
             new Parser(tokenizer, builder, diagCache).parse();
             const ast = builder.getAST();
-            const tree = ASTNode.getValueTree(ast);
-
-            expect(tree).to.eql(parsed.expected);
+            
+            expect(ast.toTestObject()).to.eql(parsed.expected);
         });
     }
 });

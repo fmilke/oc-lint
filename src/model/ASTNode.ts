@@ -5,12 +5,18 @@ interface ValueTreeResult {
     children: ValueTreeResult[],
 }
 
+// interface IASTNode {
+//     appendChild(node: ASTNode): void;
+
+//     toTestObject(): any;
+// }
+
 export class ASTNode {
     children: ASTNode[] = [];
 
-    constructor(private token: Token) { }
+    constructor(protected token: Token) { }
 
-    appendChild(node: ASTNode) {
+    public appendChild(node: ASTNode) {
         this.children.push(node);
     }
 
@@ -28,10 +34,33 @@ export class ASTNode {
         return new ASTNode(new Token(0, 0, TokenType.Root, "root"));
     }
 
-    static getValueTree(node: ASTNode): ValueTreeResult {
+    toTestObject(): any {
         return {
-            value: node.token.value,
-            children: node.children.map(ASTNode.getValueTree)
+            value: this.token.value,
+            children: this.children.map(child => child.toTestObject()),
+        };
+    }
+}
+
+export class ASTMethodNode extends ASTNode {
+
+    private parameters: ASTNode[] = [];
+    private modifier: ASTNode | null = null;
+
+    setParameters(nodes: ASTNode[]) {
+        this.parameters = nodes;
+    }
+
+    setModifier(modifier: ASTNode | null) {
+        this.modifier = modifier;
+    }
+
+    toTestObject() {
+        return {
+            parameters: this.parameters.map(child => child.toTestObject()),
+            modifier: this.modifier !== null ? this.modifier.toTestObject() : null,
+            value: this.token.value,
+            children: this.children.map(child => child.toTestObject()),
         }
     }
 }

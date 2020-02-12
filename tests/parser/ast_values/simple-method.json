@@ -1,0 +1,18 @@
+{
+    "name": "Hash Identifier",
+    "scope": "root",
+    "target": "public func Method() {}",
+    "expected": {
+        "value": "root",
+        "children": [{
+            "value": "func",
+            "name": "Method",
+            "modifier": "global",
+            "parameters": [],
+            "children": [{
+                "value": "Clonk",
+                "children": []
+            }]
+        }]
+    }
+}
