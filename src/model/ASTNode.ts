@@ -8,9 +8,7 @@ interface ValueTreeResult {
 export class ASTNode {
     children: ASTNode[] = [];
 
-    constructor(private token: Token) {
-
-    }
+    constructor(private token: Token) { }
 
     appendChild(node: ASTNode) {
         this.children.push(node);
@@ -20,6 +18,10 @@ export class ASTNode {
         const parent = new ASTNode(parentToken);
         parent.appendChild(new ASTNode(childToken));
         return parent;
+    }
+
+    static fromToken(token: Token) {
+        return new ASTNode(token);
     }
 
     static createRoot() {

@@ -5,7 +5,8 @@
   "main": "main.js",
   "scripts": {
     "test": "mocha -r ts-node/register tests/**/*.ts",
-    "test-parser": "mocha -r ts-node/register tests/parseTreeBuilder/*.test.ts",
+    "test-tokenizer": "mocha -r ts-node/register tests/tokenizer/*.test.ts",
+    "test-parser": "mocha -r ts-node/register tests/parser/*.test.ts",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "start": "node ./out/main.js",

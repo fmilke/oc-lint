@@ -1,0 +1,32 @@
+{
+    "name": "Hash Identifier",
+    "scope": "root",
+    "target": "static Asd; local clonk = Clonk",
+    "expected": {
+        "value": "root",
+        "children": [
+            {
+                "value": "static",
+                "children": [
+                    {
+                        "value": "Asd",
+                        "children": []
+                    }
+                ]
+            },
+            {
+                "value": "local",
+                "children": [
+                    {
+                        "value": "clonk",
+                        "children": []
+                    },
+                    {
+                        "value": "Clonk",
+                        "children": []
+                    }
+                ]
+            }
+        ]
+    }
+}

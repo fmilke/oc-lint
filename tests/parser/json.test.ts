@@ -3,11 +3,12 @@ import * as path from 'path';
 import { expect } from 'chai';
 import { Tokenizer } from '../../src/impl/Tokenizer';
 import { ASTBuilder } from '../../src/impl/ASTBuilder';
-import { Parser } from '../../src/impl/parser';
+import { Parser } from '../../src/impl/Parser';
+import { DiagnosticsCache } from '../../src/impl/DiagnosticsCache';
 import { ASTNode } from '../../src/model/ASTNode';
 
-describe('Yml Tester', () => {
-    const targetDir = './tests/parseTreeBuilder/ast_values';
+describe('Parser', () => {
+    const targetDir = './tests/parser/ast_values';
     const fileNames = readdirSync(targetDir);
 
     for (let fileName of fileNames) {
@@ -20,10 +21,11 @@ describe('Yml Tester', () => {
 
             const tokenizer = new Tokenizer(parsed.target);
             const builder = new ASTBuilder();
-            new Parser(tokenizer, builder).parse();
+            const diagCache = new DiagnosticsCache();
+            new Parser(tokenizer, builder, diagCache).parse();
             const ast = builder.getAST();
             const tree = ASTNode.getValueTree(ast);
-            
+
             expect(tree).to.eql(parsed.expected);
         });
     }
