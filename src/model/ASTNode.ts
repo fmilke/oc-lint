@@ -45,7 +45,7 @@ export class ASTParameterLeaf extends ASTLeaf {
 
     toTestObject() {
         return {
-            name: this.identToken.value,
+            value: this.identToken.value,
             type: this.typeToken ? this.typeToken.value : null,
         }
     }

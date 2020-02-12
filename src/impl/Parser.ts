@@ -130,7 +130,7 @@ export class Parser implements IParser {
 
     private parseMethod(modifierToken?: Token) {
         const handle = this.builder.startMethodNode(modifierToken || null);
-        const next = this.stageNext();
+        let next = this.stageNext();
 
         if (next.type === TokenType.Identifier) {
             if (!handle.setMethodName(next)) {
@@ -140,12 +140,19 @@ export class Parser implements IParser {
         }
         else if (next.type === TokenType.Round_Paren_L) {
             this.stageNext();
-            this.parseParameters(handle);
+            return this.parseParameters(handle);
+        }
+
+        next = this.stageNext();
+        if (next.type === TokenType.Round_Paren_L) {
+            this.stageNext();
+            return this.parseParameters(handle);
         }
     }
 
     private parseParameters(handle: ASTMethodNodeHandle) {
         const first = this.staged;
+        console.log(first);
 
         if (first.type === TokenType.Round_Paren_R)
             return;
@@ -155,7 +162,7 @@ export class Parser implements IParser {
             this.parseParameters(handle);
             return;
         }
-        else if(first.type !== TokenType.Identifier) {
+        else if (first.type !== TokenType.Identifier) {
             this.diagnostics.raiseError(first, "Expecting type or identifier.");
             return;
         }
@@ -163,7 +170,9 @@ export class Parser implements IParser {
         const next = this.stageNext();
 
         if (next.type === TokenType.Comma) {
-            handle.addParameter(next);
+            handle.addParameter(first);
+            this.stageNext();
+            this.parseParameters(handle);
         }
         else if (next.type === TokenType.Identifier) {
             if (this.isDataType(first.value)) {
