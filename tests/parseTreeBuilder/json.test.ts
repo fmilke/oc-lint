@@ -1,29 +1,29 @@
 import { promises, readdirSync } from 'fs';
 import * as path from 'path';
-import * as YAML from 'yaml';
 import { expect } from 'chai';
 import { Tokenizer } from '../../src/impl/Tokenizer';
-import { ParseTreeBuilder } from '../../src/impl/ParseTreeBuilder';
-import { ParseTreeHelper } from './Helper';
-
-interface YamlStructure {
-    name: string,
-    target: string,
-    expected: [any],
-}
+import { ASTBuilder } from '../../src/impl/ASTBuilder';
+import { Parser } from '../../src/impl/parser';
+import { ASTNode } from '../../src/model/ASTNode';
 
 describe('Yml Tester', () => {
-    const targetDir = './tests/parseTreeBuilder/value_matches';
+    const targetDir = './tests/parseTreeBuilder/ast_values';
     const fileNames = readdirSync(targetDir);
 
     for (let fileName of fileNames) {
+        if (path.extname(fileName) !== ".json")
+            continue;
+
         it(`should create parse tree according to ${fileName}`, async () => {
             const data = await promises.readFile(path.join(targetDir, fileName), { encoding: 'utf-8' });
-            const parsed = YAML.parse(data) as YamlStructure;
+            const parsed = JSON.parse(data);
 
             const tokenizer = new Tokenizer(parsed.target);
-            const tree = ParseTreeHelper.getValueTree(tokenizer);
-
+            const builder = new ASTBuilder();
+            new Parser(tokenizer, builder).parse();
+            const ast = builder.getAST();
+            const tree = ASTNode.getValueTree(ast);
+            
             expect(tree).to.eql(parsed.expected);
         });
     }
