@@ -35,6 +35,10 @@ export class Parser implements IParser {
                     else if (token.value === "func") {
                         this.parseMethod();
                     }
+                    else if (token.value === "return") {
+                        this.stageNext();
+                        this.parseReturn(token);
+                    }
                     else {
                         this.diagnostics.raiseError(token, "Unexpected identifier.")
                     }
@@ -76,6 +80,21 @@ export class Parser implements IParser {
         }
         else {
             this.diagnostics.raiseError(maybeIdent, "Missing identifier.");
+        }
+    }
+
+    private parseReturn(returnToken: Token) {
+        this.builder.beginReturnStatement(returnToken);
+        this.parseExpression();
+
+        const maybeSemicolon = this.staged;
+
+        if (maybeSemicolon.type === TokenType.Semicolon) {
+            this.builder.finalizeReturnStatement();
+        }
+        else {
+            this.builder.finalizeReturnStatement();
+            this.diagnostics.raiseError(maybeSemicolon, "Expected ';'");
         }
     }
 

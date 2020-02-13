@@ -1,5 +1,5 @@
 import { Token, TokenType } from "../ifaces/ITokenizer";
-import { ASTNode, ASTMethodNode } from "../model/ASTNode";
+import { ASTNode, ASTMethodNode, ASTLeaf } from "../model/ASTNode";
 
 export enum Scope {
     Expression,
@@ -59,6 +59,16 @@ export class ASTBuilder {
         this.addToStack(node);
 
         return new ASTMethodNodeHandle(node);
+    }
+
+    beginReturnStatement(token: Token) {
+        const node = new ASTNode(token);
+        this.current.appendChild(node);
+        this.addToStack(node);
+    }
+
+    finalizeReturnStatement() {
+
     }
 }
 

@@ -1,0 +1,42 @@
+{
+    "name": "Toplevel Method with parameters and return expression",
+    "scope": "root",
+    "target": "func Sum(int a, int b) { return a + b; }",
+    "expected": {
+        "value": "root",
+        "children": [
+            {
+                "value": "Method",
+                "modifier": "global",
+                "parameters": [
+                    {
+                        "type": null,
+                        "value": "a"
+                    },
+                    {
+                        "type": "object",
+                        "value": "clonk"
+                    }
+                ],
+                "children": [
+                    {
+                        "value": "return",
+                        "children": [
+                            {
+                                "value": "+",
+                                "children": [
+                                    {
+                                        "value": "a"
+                                    },
+                                    {
+                                        "value": "b"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

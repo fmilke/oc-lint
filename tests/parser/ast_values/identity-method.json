@@ -1,0 +1,31 @@
+{
+    "name": "Toplevel Method which returns a parameter",
+    "scope": "root",
+    "target": "func Identity(any thing) { return thing; }",
+    "expected": {
+        "value": "root",
+        "children": [
+            {
+                "value": "Identity",
+                "modifier": null,
+                "parameters": [
+                    {
+                        "type": "any",
+                        "value": "thing"
+                    }
+                ],
+                "children": [
+                    {
+                        "value": "return",
+                        "children": [
+                            {
+                                "value": "thing",
+                                "children": []
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}
