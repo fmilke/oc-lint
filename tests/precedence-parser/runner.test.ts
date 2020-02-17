@@ -1,12 +1,12 @@
 import { readdirSync, promises } from "fs";
-import path = require("path");
+import * as path from 'path';
 import { Tokenizer } from "../../src/impl/Tokenizer";
 import { expect } from "chai";
 import { PrecedenceParser } from "../../src/impl/PrecedenceParser";
 import { ASTNode } from "../../src/model/ASTNode";
 
 describe('Precedence Parser', () => {
-    const targetDir = './tests/precedence-parser/json';
+    const targetDir = path.join(__dirname, 'json');
     const fileNames = readdirSync(targetDir);
 
     for (let fileName of fileNames) {
