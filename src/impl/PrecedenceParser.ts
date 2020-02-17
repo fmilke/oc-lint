@@ -14,8 +14,6 @@ export class PrecedenceParser {
 
     public parse() {
         while (this.operators.length) {
-            console.log(this.operators.map(node => node.token.value));
-
             // Should not throw, should push diagonstic
             if (!this.tryGetNodeWithHighestPrecedence(this.operators))
                 throw new Error("Could not get node with precedence");
@@ -24,16 +22,12 @@ export class PrecedenceParser {
                 throw new Error("Failed");
             }
 
-            console.log(`Apply rule of ${this.rule.value}`);
-
             this.applyRule(this.node, this.rule);
         }
     }
 
     private applyRule(node: ASTNode, rule: PrecedenceRule) {
         const idx = this.nodes.indexOf(node);
-        
-        console.log(node.toDebugString());
 
         if (rule.parameters === 1) {
             if (rule.position === PrecedencePosition.Prefix) {
@@ -71,6 +65,8 @@ export class PrecedenceParser {
             }
         }
 
+        this.operators.splice(this.operators.indexOf(node), 1);
+
         return true;
     }
 
@@ -81,9 +77,7 @@ export class PrecedenceParser {
 
         for (let node of nodes) {
             if (this.isOperatorToken(node.token)) {
-                console.log(node.token.value);
                 const rule = this.getOperatorPrecedence(node.token);
-                console.log(rule);
 
                 if (rule.priority > maxPriority) {
                     maxPriority = rule.priority;

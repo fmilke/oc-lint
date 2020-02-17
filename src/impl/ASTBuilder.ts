@@ -23,7 +23,6 @@ export class ASTBuilder {
 
     addNode(token: Token) {
         this.current.appendChild(ASTNode.fromToken(token));
-        console.log(this.root.toDebugString());
     }
 
     addHashIdentifierNode(hashIdentToken: Token, identToken: Token) {
@@ -77,7 +76,6 @@ export class ASTBuilder {
     }
 
     finalizeExpression() {
-        console.log(this.current.toDebugString());
         const subParser = new PrecedenceParser(this.current.children);
         subParser.parse();
         this.popFromStack();
