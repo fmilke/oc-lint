@@ -2,8 +2,6 @@ import { ITokenizer, TokenType, Token } from "../ifaces/ITokenizer";
 import { ASTBuilder, ASTMethodNodeHandle } from "./ASTBuilder";
 import { IParser } from "../ifaces/IParser";
 import { IDiagnosticsCache } from "../ifaces/IErrorCache";
-import { precedenceRules } from "./Rules";
-import { ASTNode } from "../model/ASTNode";
 
 enum Scope {
     Expression,
@@ -111,6 +109,8 @@ export class Parser implements IParser {
     private parseExpression() {
         let current = this.staged;
         let level = 0;
+
+        this.builder.startExpression();
 
         while (level >= 0 && !this.isExpressionDelimiter(current.type)) {
             let next = this.stageNext();

@@ -2,7 +2,7 @@ import { readdirSync, promises } from "fs";
 import path = require("path");
 import { Tokenizer } from "../../src/impl/Tokenizer";
 import { expect } from "chai";
-import { ExpressionParser } from "../../src/impl/ExpressionParser";
+import { PrecedenceParser } from "../../src/impl/PrecedenceParser";
 import { ASTNode } from "../../src/model/ASTNode";
 
 describe('Precedence Parser', () => {
@@ -23,10 +23,8 @@ describe('Precedence Parser', () => {
             nodes.pop();
             nodes.forEach(node => root.appendChild(node));
             // pop EOF node
-            const parser = new ExpressionParser(nodes);
+            const parser = new PrecedenceParser(nodes);
             parser.parse();
-            console.log("--------------");
-            console.log(root.children);
             expect(root.children[0].toTestObject()).to.eql(parsed.expected);
         });
     }

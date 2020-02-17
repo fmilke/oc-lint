@@ -3,7 +3,6 @@ import { Token, TokenType } from "../ifaces/ITokenizer";
 export class ASTNode {
     children: ASTNode[] = [];
 
-
     protected _parent: ASTNode | null = null;
 
     get parent() {
@@ -54,6 +53,15 @@ export class ASTNode {
             value: this.token.value,
             children: this.children.map(child => child.toTestObject()),
         };
+    }
+
+    toDebugString(level: number = 0) {
+        let str = `${'-'.padStart(level * 2, " ")}${this.token.value}\n`;
+        for (let child of this.children) {
+            str += child.toDebugString(level + 1);
+        }
+
+        return str;
     }
 }
 
