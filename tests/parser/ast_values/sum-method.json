@@ -1,21 +1,17 @@
 {
-    "name": "Toplevel Method with parameters and return expression",
+    "name": "Toplevel Method which returns a parameter",
     "scope": "root",
-    "target": "func Sum(int a, int b) { return a + b; }",
+    "target": "func Identity(any thing) { return a * b; }",
     "expected": {
         "value": "root",
         "children": [
             {
-                "value": "Method",
-                "modifier": "global",
+                "value": "Identity",
+                "modifier": null,
                 "parameters": [
                     {
-                        "type": null,
-                        "value": "a"
-                    },
-                    {
-                        "type": "object",
-                        "value": "clonk"
+                        "type": "any",
+                        "value": "thing"
                     }
                 ],
                 "children": [
@@ -23,13 +19,15 @@
                         "value": "return",
                         "children": [
                             {
-                                "value": "+",
+                                "value": "*",
                                 "children": [
                                     {
-                                        "value": "a"
+                                        "value": "a",
+                                        "children": []
                                     },
                                     {
-                                        "value": "b"
+                                        "value": "b",
+                                        "children": []
                                     }
                                 ]
                             }

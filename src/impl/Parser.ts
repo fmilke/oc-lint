@@ -1,12 +1,19 @@
 import { ITokenizer, TokenType, Token } from "../ifaces/ITokenizer";
 import { ASTBuilder, ASTMethodNodeHandle } from "./ASTBuilder";
 import { IParser } from "../ifaces/IParser";
-import { ParseError } from "../model/ParseError";
 import { IDiagnosticsCache } from "../ifaces/IErrorCache";
+import { precedenceRules } from "./Rules";
+import { ASTNode } from "../model/ASTNode";
+
+enum Scope {
+    Expression,
+    Root,
+    FunctionBody,
+}
 
 export class Parser implements IParser {
     private staged = new Token(0, 0, TokenType.Root, "");
-    private errors: ParseError[] = [];
+    private scope: Scope = Scope.Root; 
 
     constructor(
         private tokenizer: ITokenizer,
@@ -98,15 +105,35 @@ export class Parser implements IParser {
         }
     }
 
+    // parsing of expression is done by
+    // consuming all tokens until a delimiter is reached
+    // and then perform precedence parsing on these tokens
     private parseExpression() {
-        const first = this.staged;
+        let current = this.staged;
+        let level = 0;
 
-        if (first.type === TokenType.Identifier) {
-            this.builder.addNode(first);
+        while (level >= 0 && !this.isExpressionDelimiter(current.type)) {
+            let next = this.stageNext();
+            switch (current.type) {
+                case TokenType.ArithmicOperator:
+                case TokenType.NilCaseOperator:
+                case TokenType.AssignmentOperator:
+                case TokenType.BitwiseOperator:
+                case TokenType.LogicalOperator:
+                    this.builder.addNode(current);
+                    break;
+                case TokenType.Identifier:
+                    this.builder.addNode(current);
+                    break;
+                default:
+                    this.builder.abortExpression();
+                    return;
+            }
+
+            current = next;
         }
-        else {
-            throw new Error("Unimplemented");
-        }
+
+        this.builder.finalizeExpression();
     }
 
     private stageNext() {
@@ -147,6 +174,12 @@ export class Parser implements IParser {
         }
     }
 
+    isExpressionDelimiter(type: TokenType): boolean {
+        return type === TokenType.Semicolon ||
+            type === TokenType.Comma ||
+            type === TokenType.EOF;
+    }
+
     private parseMethod(modifierToken?: Token) {
         const handle = this.builder.startMethodNode(modifierToken || null);
         let next = this.stageNext();
@@ -171,7 +204,6 @@ export class Parser implements IParser {
 
     private parseParameters(handle: ASTMethodNodeHandle) {
         const first = this.staged;
-        console.log(first);
 
         if (first.type === TokenType.Round_Paren_R)
             return;

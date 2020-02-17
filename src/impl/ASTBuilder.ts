@@ -1,5 +1,6 @@
 import { Token, TokenType } from "../ifaces/ITokenizer";
 import { ASTNode, ASTMethodNode, ASTLeaf } from "../model/ASTNode";
+import { ExpressionParser } from "./ExpressionParser";
 
 export enum Scope {
     Expression,
@@ -69,6 +70,34 @@ export class ASTBuilder {
 
     finalizeReturnStatement() {
 
+    }
+
+    expressionNodes: ASTNode[] | null = null;
+    parsedExpressionNodes: ASTNode[] = [];
+
+    // startExpression(tokens: Token[]) {
+    //     if (this.expressionNodes !== null)
+    //         throw new Error("Starting expression while previous has not been finalized");
+
+    //     this.expressionNodes = tokens.map(token => new ASTNode(token));
+
+    //     // Add everything that is not an operator as 'parsed'
+    //     this.parsedExpressionNodes.concat(...this.expressionNodes.filter(node => this.isOperatorToken(node.token)))
+    // }
+
+    startExpression() {
+        const node = ASTNode.createRoot();
+        this.addToStack(node);
+    }
+
+    finalizeExpression() {
+        const subParser = new ExpressionParser(this.current.children);
+        subParser.parse();
+        this.popFromStack();
+    }
+
+    abortExpression() {
+        this.popFromStack();   
     }
 }
 

@@ -3,10 +3,36 @@ import { Token, TokenType } from "../ifaces/ITokenizer";
 export class ASTNode {
     children: ASTNode[] = [];
 
-    constructor(protected token: Token) { }
+
+    protected _parent: ASTNode | null = null;
+
+    get parent() {
+        return this._parent;
+    }
+
+    constructor(public token: Token) { }
 
     public appendChild(node: ASTNode) {
         this.children.push(node);
+
+        if (node._parent !== null) {
+            node._parent.removeChild(node);
+        }
+
+        node._parent = this;
+    }
+
+    public removeChild(node: ASTNode) {
+        const idx = this.children.indexOf(node);
+        if (idx === -1)
+            throw new Error("Trying to remove node which is not a child");   
+        
+        this.children.splice(idx, 1);
+        node._parent = null;
+    }
+
+    public getRoot(): ASTNode | null {
+        return this._parent !== null ? this._parent.getRoot() : this;
     }
 
     static fromTokenWithChild(parentToken: Token, childToken: Token) {
@@ -32,7 +58,7 @@ export class ASTNode {
 }
 
 export class ASTLeaf {
-    constructor(protected token: Token) { }
+    constructor(public token: Token) { }
     toTestObject(): any {
         return this.token.value;
     }
