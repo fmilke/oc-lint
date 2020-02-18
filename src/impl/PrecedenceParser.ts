@@ -7,11 +7,8 @@ export class PrecedenceParser {
     private node: null | ASTNode = null;
     private rule: null | PrecedenceRule = null;
     private operators: ASTNode[] = [];
-    root: ASTNode | null = null;
-
     constructor(private nodes: ASTNode[]) {
         this.operators = nodes.filter(node => this.isOperatorToken(node.token));
-        this.root = nodes[0].parent;
     }
 
     public parse() {
@@ -23,8 +20,6 @@ export class PrecedenceParser {
             if (this.node === null || this.rule === null) {
                 throw new Error("Failed");
             }
-
-            const current = this.root === null ? null : this.root.toTestObject();
 
             this.applyRule(this.node, this.rule);
         }
@@ -62,7 +57,6 @@ export class PrecedenceParser {
                 throw new Error("Error3");
             }
             else {
-
                 node.appendChild(this.nodes[idx - 1]);
                 node.appendChild(this.nodes[idx + 1]);
                 this.nodes.splice(idx - 1, 3, node);

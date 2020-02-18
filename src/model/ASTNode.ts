@@ -30,6 +30,23 @@ export class ASTNode {
         node._parent = null;
     }
 
+    public replaceChild(oldChild: ASTNode, newChild: ASTNode) {
+        const idx = this.children.indexOf(oldChild);
+
+        if (idx === -1)
+            throw new Error("Trying to replace node which is not a child");
+
+        this.children[idx] = newChild;
+        oldChild._parent = null;
+        newChild.removeSafelyFromParent();
+        newChild._parent = this;
+    }
+
+    public removeSafelyFromParent() {
+        if (this._parent !== null)
+            this._parent.removeChild(this);
+    }
+
     public getRoot(): ASTNode | null {
         return this._parent !== null ? this._parent.getRoot() : this;
     }

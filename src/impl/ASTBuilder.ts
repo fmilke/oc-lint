@@ -6,6 +6,8 @@ export class ASTBuilder {
     private root = ASTNode.createRoot();
     private current = this.root;
     private stack: ASTNode[] = [this.root];
+    private expressionCollectionStack: ASTNode[][] = [];
+    private currentExpressionCollection: ASTNode[] | null = null;
 
     addToStack(node: ASTNode) {
         this.stack.push(node);
@@ -13,8 +15,9 @@ export class ASTBuilder {
     }
 
     popFromStack() {
-        this.stack.pop();
+        const node = this.stack.pop();
         this.current = this.stack[this.stack.length - 1];
+        return node;
     }
 
     getRoot() {
@@ -66,9 +69,6 @@ export class ASTBuilder {
 
     }
 
-    expressionNodes: ASTNode[] | null = null;
-    parsedExpressionNodes: ASTNode[] = [];
-
     startExpression() {
         const node = ASTNode.createRoot();
         this.current.appendChild(node);
@@ -76,9 +76,10 @@ export class ASTBuilder {
     }
 
     finalizeExpression() {
-        const subParser = new PrecedenceParser(this.current.children);
+        const subParser = new PrecedenceParser(this.current.children.slice());
         subParser.parse();
-        this.popFromStack();
+        const expressionRoot = this.popFromStack() as ASTNode;
+        this.current.replaceChild(expressionRoot, expressionRoot.children[0]);
     }
 
     abortExpression() {

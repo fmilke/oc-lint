@@ -119,6 +119,7 @@ export class Parser implements IParser {
                     this.builder.addNode(current);
                     break;
                 default:
+                    this.diagnostics.raiseError(next, "Unexpected token: " + next.value);
                     this.builder.abortExpression();
                     return;
             }
