@@ -1,6 +1,4 @@
 {
-    "name": "Hash Identifier",
-    "scope": "root",
     "target": "#appendto Clonk",
     "expected": {
         "value": "root",

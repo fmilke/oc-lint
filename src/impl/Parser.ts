@@ -3,15 +3,8 @@ import { ASTBuilder, ASTMethodNodeHandle } from "./ASTBuilder";
 import { IParser } from "../ifaces/IParser";
 import { IDiagnosticsCache } from "../ifaces/IErrorCache";
 
-enum Scope {
-    Expression,
-    Root,
-    FunctionBody,
-}
-
 export class Parser implements IParser {
     private staged = new Token(0, 0, TokenType.Root, "");
-    private scope: Scope = Scope.Root; 
 
     constructor(
         private tokenizer: ITokenizer,

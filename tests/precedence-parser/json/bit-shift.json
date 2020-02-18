@@ -1,5 +1,4 @@
 {
-    "name": "Some bit shifting",
     "target": "a << 3 >> b",
     "expected": {
         "value": ">>",

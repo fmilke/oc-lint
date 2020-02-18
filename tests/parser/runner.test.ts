@@ -7,7 +7,7 @@ import { Parser } from '../../src/impl/Parser';
 import { DiagnosticsCache } from '../../src/impl/DiagnosticsCache';
 
 describe('Parser', () => {
-    const targetDir = './tests/parser/ast_values';
+    const targetDir = path.join(__dirname, 'json');
     const fileNames = readdirSync(targetDir);
 
     for (let fileName of fileNames) {

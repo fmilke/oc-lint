@@ -1,6 +1,4 @@
 {
-    "name": "Toplevel Method with parameters",
-    "scope": "root",
     "target": "global func Method(a, object clonk) {}",
     "expected": {
         "value": "root",

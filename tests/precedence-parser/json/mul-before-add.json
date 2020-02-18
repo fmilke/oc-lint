@@ -1,6 +1,4 @@
 {
-    "name": "Simple * before + expression",
-    "scope": "expression",
     "target": "a + b * c",
     "expected": {
         "value": "+",

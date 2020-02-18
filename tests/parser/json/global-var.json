@@ -1,6 +1,4 @@
 {
-    "name": "Global variables",
-    "scope": "root",
     "target": "static Asd; local clonk = Clonk",
     "expected": {
         "value": "root",

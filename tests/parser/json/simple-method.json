@@ -1,6 +1,4 @@
 {
-    "name": "Simple toplevel method",
-    "scope": "root",
     "target": "public func Method() {}",
     "expected": {
         "value": "root",

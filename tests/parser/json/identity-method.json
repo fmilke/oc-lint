@@ -1,6 +1,4 @@
 {
-    "name": "Toplevel Method which returns a parameter",
-    "scope": "root",
     "target": "func Identity(any thing) { return thing; }",
     "expected": {
         "value": "root",
