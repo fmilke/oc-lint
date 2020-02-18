@@ -1,0 +1,26 @@
+{
+    "name": "Some bit shifting",
+    "target": "a << 3 >> b",
+    "expected": {
+        "value": ">>",
+        "children": [
+            {
+                "value": "<<",
+                "children": [
+                    {
+                        "value": "a",
+                        "children": []
+                    },
+                    {
+                        "value": "3",
+                        "children": []
+                    }
+                ]
+            },
+            {
+                "value": "b",
+                "children": []
+            }
+        ]
+    }
+}

@@ -36,6 +36,24 @@ export const precedenceRules: PrecedenceRule[] = [
         priority: 13,
         value: "/",
     },
+    {   // 14l	**	Yields the power of a to b.	postfix	int, int/int
+        parameters: 2,
+        position: PrecedencePosition.Postfix,
+        priority: 14,
+        value: "**",
+    },
+    {
+        parameters: 2,
+        position: PrecedencePosition.Postfix,
+        priority: 11,
+        value: "<<",
+    },
+    {
+        parameters: 2,
+        position: PrecedencePosition.Postfix,
+        priority: 11,
+        value: ">>",
+    },
 ];
 
 // ++	Increases the value of the following variable by 1.	prefix	reference, reference

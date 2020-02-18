@@ -1,0 +1,52 @@
+{
+    "target": "a * b / c % 10 + 2 ** 3",
+    "expected": {
+        "value": "+",
+        "children": [
+            {
+                "value": "%",
+                "children": [
+                    {
+                        "value": "/",
+                        "children": [
+                            {
+                                "value": "*",
+                                "children": [
+                                    {
+                                        "value": "a",
+                                        "children": []
+                                    },
+                                    {
+                                        "value": "b",
+                                        "children": []
+                                    }
+                                ]
+                            },
+                            {
+                                "value": "c",
+                                "children": []
+                            }
+                        ]
+                    },
+                    {
+                        "value": "10",
+                        "children": []
+                    }
+                ]
+            },
+            {
+                "value": "**",
+                "children": [
+                    {
+                        "value": "2",
+                        "children": []
+                    },
+                    {
+                        "value": "3",
+                        "children": []
+                    }
+                ]
+            }
+        ]
+    }
+}
