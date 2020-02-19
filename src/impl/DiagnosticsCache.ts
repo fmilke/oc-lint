@@ -1,4 +1,4 @@
-import { IDiagnosticsCache } from "../ifaces/IErrorCache";
+import { IDiagnosticsCache } from "../ifaces/IDiagnosticsCache";
 import { Token } from "../ifaces/ITokenizer";
 
 

@@ -1,7 +1,7 @@
 import { ITokenizer, TokenType, Token } from "../ifaces/ITokenizer";
 import { ASTBuilder, ASTMethodNodeHandle } from "./ASTBuilder";
 import { IParser } from "../ifaces/IParser";
-import { IDiagnosticsCache } from "../ifaces/IErrorCache";
+import { IDiagnosticsCache } from "../ifaces/IDiagnosticsCache";
 
 export class Parser implements IParser {
     private staged = new Token(0, 0, TokenType.Root, "");
@@ -118,6 +118,20 @@ export class Parser implements IParser {
                 case TokenType.Identifier:
                     this.builder.addNode(current);
                     break;
+                case TokenType.Round_Paren_L:
+                    this.builder.startExpression();
+                    level++;
+                    break;
+                case TokenType.Round_Paren_R:
+                    if (level > 0) {
+                        this.builder.finalizeExpression();
+                    }
+                    level--;
+                break;
+                // case TokenType.Semicolon:
+                // case TokenType.Comma:
+                // case TokenType.EOF:
+                //     break;
                 default:
                     this.diagnostics.raiseError(next, "Unexpected token: " + next.value);
                     this.builder.abortExpression();
