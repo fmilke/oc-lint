@@ -252,6 +252,10 @@ export class Parser implements IParser {
                 result.push(new ParameterNode(next));
             }
             else if (commaOrIdent.type === TokenType.Identifier) {
+                if (!this.isDataType(next.value)) {
+                    this.diagnostics.raiseError(next, "Unexpected identifier. Expected type");
+                }
+
                 result.push(new ParameterNode(commaOrIdent, next));
             }
             else if (commaOrIdent.type === TokenType.Round_Paren_R) {
