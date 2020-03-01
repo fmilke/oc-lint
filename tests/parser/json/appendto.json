@@ -1,0 +1,9 @@
+{
+    "target": "#appendto Clonk",
+    "expected": {
+        "children": [{
+            "identifier": "Clonk",
+            "keyword": "#appendto"
+        }]
+    }
+}
