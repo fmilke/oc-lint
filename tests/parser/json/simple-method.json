@@ -1,12 +1,17 @@
 {
-    "target": "public func Method() {}",
+    "target": "func MethodName(object clonk) { }",
     "expected": {
-        "value": "root",
-        "children": [{
-            "value": "Method",
-            "modifier": "public",
-            "parameters": [],
-            "children": []
-        }]
+        "children": [
+            {
+                "keyword": "func",
+                "identifier": "MethodName",
+                "visibility": null,
+                "parameters": [{
+                    "type": "object",
+                    "identifier": "clonk"
+                }],
+                "children": []
+            }
+        ]
     }
 }

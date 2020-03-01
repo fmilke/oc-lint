@@ -2,7 +2,6 @@ import { promises, readdirSync } from 'fs';
 import * as path from 'path';
 import { expect } from 'chai';
 import { Tokenizer } from '../../src/impl/Tokenizer';
-import { ASTBuilder } from '../../src/impl/ASTBuilder';
 import { Parser } from '../../src/impl/Parser';
 import { DiagnosticsCache } from '../../src/impl/DiagnosticsCache';
 
@@ -19,12 +18,10 @@ describe('Parser', () => {
             const parsed = JSON.parse(data);
 
             const tokenizer = new Tokenizer(parsed.target);
-            const builder = new ASTBuilder();
             const diagCache = new DiagnosticsCache();
-            new Parser(tokenizer, builder, diagCache).parse();
-            const ast = builder.getRoot();
-
-            expect(ast.toTestObject()).to.eql(parsed.expected);
+            const parser = new Parser(tokenizer, diagCache);
+            parser.parse();
+            expect(parser.root.toTestObject()).to.eql(parsed.expected);
         });
     }
 });

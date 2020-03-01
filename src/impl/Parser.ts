@@ -1,22 +1,31 @@
 import { ITokenizer, TokenType, Token } from "../ifaces/ITokenizer";
-import { ASTBuilder, ASTMethodNodeHandle } from "./ASTBuilder";
 import { IParser } from "../ifaces/IParser";
 import { IDiagnosticsCache } from "../ifaces/IDiagnosticsCache";
+import { appContainer } from "../app";
+import { IASTStack } from "../ifaces/IASTStack";
+import { ModuleNode, RootNode, ReturnStatementNode, ExpressionNode, MethodNode, GlobalVariableNode, ParameterNode } from "../model/ASTNode";
 
 export class Parser implements IParser {
-    private staged = new Token(0, 0, TokenType.Root, "");
+    private staged = new Token(0, 0, TokenType.Unimplemented, "");
+    public root: RootNode;
+    private _stack = appContainer.resolve<IASTStack>("ASTStack");
 
     constructor(
         private tokenizer: ITokenizer,
-        private builder: ASTBuilder,
         private diagnostics: IDiagnosticsCache,
-    ) { }
+    ) {
+        this.root = new RootNode();
+        this._stack.addToStack(this.root);
+    }
 
     parse() {
         this.parseTopLevel();
     }
 
     private parseTopLevel() {
+
+        let node;
+
         for (let token of this.tokenizer) {
             this.staged = token;
             switch (token.type) {
@@ -24,18 +33,30 @@ export class Parser implements IParser {
                     this.parseModule();
                     break;
                 case TokenType.Identifier:
-                    if (this.isGlobalVariableModifier(token.value))
-                        this.parseGlobalVariable();
+                    if (this.isGlobalVariableModifier(token.value)) {
+                        node = this.parseGlobalVariable();
+                        if (node !== null)
+                            this._stack.appendToCurrent(node);
+                    }
                     else if (this.isMethodModifier(token.value)) {
-                        this.stageNext();
-                        this.parseMethod(token);
+                        node = this.parseMethod(this.stageNext(), token);
+                        if (node !== null) {
+                            this._stack.appendToCurrent(node);
+                            this._stack.addToStack(node);
+                        }
                     }
                     else if (token.value === "func") {
-                        this.parseMethod();
+                        node = this.parseMethod(token);
+                        if (node !== null) {
+                            this._stack.appendToCurrent(node);
+                            this._stack.addToStack(node);
+                        }
                     }
                     else if (token.value === "return") {
                         this.stageNext();
-                        this.parseReturn(token);
+                        node = this.parseReturn(token);
+                        if (node !== null)
+                            this._stack.appendToCurrent(node);
                     }
                     else {
                         this.diagnostics.raiseError(token, "Unexpected identifier.")
@@ -45,104 +66,110 @@ export class Parser implements IParser {
         }
     }
 
-    // #appendto Clonk
+    // e.g. #appendto Clonk
     private parseModule() {
-        const hashIdent = this.staged;
-        this.stageNext();
+        const keyword = this.staged;
+        const next = this.stageNext();
 
-        if (this.staged.type === TokenType.Identifier) {
-            this.builder.addHashIdentifierNode(hashIdent, this.staged);
+        if (next.type === TokenType.Identifier) {
+            const node = new ModuleNode(keyword, next);
+            this._stack.appendToCurrent(node);
+        }
+        else {
+            this.diagnostics.raiseError(next, `Identifier expected got ${next.value}`);
         }
     }
 
     private parseGlobalVariable() {
         const modifier = this.staged;
-        this.stageNext();
-        const maybeIdent = this.staged;
+        const maybeIdent = this.stageNext();
 
         if (maybeIdent.type === TokenType.Identifier) {
             const eqOrSemicolon = this.stageNext();
 
-            if (eqOrSemicolon.type === TokenType.Semicolon) {
-                this.builder.addGlobalVariable(modifier, maybeIdent);
+            if (eqOrSemicolon.value === "=") {
+                // TODO: Add expression
+                return new GlobalVariableNode(modifier, maybeIdent);
             }
-            else if (eqOrSemicolon.value === "=") {
-                this.builder.startGlobalVariableAssignment(modifier, maybeIdent);
-                this.stageNext();
-                this.parseExpression();
-                // TODO: read ; and jump back
+            else if (eqOrSemicolon.value === ";") {
+                return new GlobalVariableNode(modifier, maybeIdent);
             }
             else {
-                this.diagnostics.raiseError(eqOrSemicolon, "Assignment or ';' expected.")
+                this.diagnostics.raiseError(eqOrSemicolon, "Expected '=' or ';'");
             }
         }
         else {
-            this.diagnostics.raiseError(maybeIdent, "Missing identifier.");
+            this.diagnostics.raiseError(maybeIdent, "Identifier expected");
         }
+
+        return null;
     }
 
-    private parseReturn(returnToken: Token) {
-        this.builder.beginReturnStatement(returnToken);
-        this.parseExpression();
+    private parseReturn(keywordToken: Token) {
+        const expressionNode = this.parseExpression();
+
+        const node = new ReturnStatementNode(keywordToken, expressionNode);
 
         const maybeSemicolon = this.staged;
 
-        if (maybeSemicolon.type === TokenType.Semicolon) {
-            this.builder.finalizeReturnStatement();
-        }
-        else {
-            this.builder.finalizeReturnStatement();
+        if (maybeSemicolon.type !== TokenType.Semicolon) {
             this.diagnostics.raiseError(maybeSemicolon, "Expected ';'");
         }
+
+        return node;
+    }
+
+    private parseExpression() {
+        return new ExpressionNode();
     }
 
     // parsing of expression is done by
     // consuming all tokens until a delimiter is reached
     // and then perform precedence parsing on these tokens
-    private parseExpression() {
-        let current = this.staged;
-        let level = 0;
+    // private _parseExpression() {
+    //     let current = this.staged;
+    //     let level = 0;
 
-        this.builder.startExpression();
+    //     this.builder.startExpression();
 
-        while (level >= 0 && !this.isExpressionDelimiter(current.type)) {
-            let next = this.stageNext();
-            switch (current.type) {
-                case TokenType.ArithmicOperator:
-                case TokenType.NilCaseOperator:
-                case TokenType.AssignmentOperator:
-                case TokenType.BitwiseOperator:
-                case TokenType.LogicalOperator:
-                    this.builder.addNode(current);
-                    break;
-                case TokenType.Identifier:
-                    this.builder.addNode(current);
-                    break;
-                case TokenType.Round_Paren_L:
-                    this.builder.startExpression();
-                    level++;
-                    break;
-                case TokenType.Round_Paren_R:
-                    if (level > 0) {
-                        this.builder.finalizeExpression();
-                    }
-                    level--;
-                break;
-                // case TokenType.Semicolon:
-                // case TokenType.Comma:
-                // case TokenType.EOF:
-                //     break;
-                default:
-                    this.diagnostics.raiseError(next, "Unexpected token: " + next.value);
-                    this.builder.abortExpression();
-                    return;
-            }
+    //     while (level >= 0 && !this.isExpressionDelimiter(current.type)) {
+    //         let next = this.stageNext();
+    //         switch (current.type) {
+    //             case TokenType.ArithmicOperator:
+    //             case TokenType.NilCaseOperator:
+    //             case TokenType.AssignmentOperator:
+    //             case TokenType.BitwiseOperator:
+    //             case TokenType.LogicalOperator:
+    //                 this.builder.addNode(current);
+    //                 break;
+    //             case TokenType.Identifier:
+    //                 this.builder.addNode(current);
+    //                 break;
+    //             case TokenType.Round_Paren_L:
+    //                 this.builder.startExpression();
+    //                 level++;
+    //                 break;
+    //             case TokenType.Round_Paren_R:
+    //                 if (level > 0) {
+    //                     this.builder.finalizeExpression();
+    //                 }
+    //                 level--;
+    //             break;
+    //             // case TokenType.Semicolon:
+    //             // case TokenType.Comma:
+    //             // case TokenType.EOF:
+    //             //     break;
+    //             default:
+    //                 this.diagnostics.raiseError(next, "Unexpected token: " + next.value);
+    //                 this.builder.abortExpression();
+    //                 return;
+    //         }
 
-            current = next;
-        }
+    //         current = next;
+    //     }
 
-        this.builder.finalizeExpression();
-    }
+    //     this.builder.finalizeExpression();
+    // }
 
     private stageNext() {
         this.staged = this.tokenizer.nextToken();
@@ -188,62 +215,56 @@ export class Parser implements IParser {
             type === TokenType.EOF;
     }
 
-    private parseMethod(modifierToken?: Token) {
-        const handle = this.builder.startMethodNode(modifierToken || null);
-        let next = this.stageNext();
-
-        if (next.type === TokenType.Identifier) {
-            if (!handle.setMethodName(next)) {
-                this.diagnostics.raiseError(next, "Unexpected identifier.");
-                return;
-            }
-        }
-        else if (next.type === TokenType.Round_Paren_L) {
-            this.stageNext();
-            return this.parseParameters(handle);
-        }
-
-        next = this.stageNext();
-        if (next.type === TokenType.Round_Paren_L) {
-            this.stageNext();
-            return this.parseParameters(handle);
-        }
-    }
-
-    private parseParameters(handle: ASTMethodNodeHandle) {
-        const first = this.staged;
-
-        if (first.type === TokenType.Round_Paren_R)
-            return;
-        else if (first.type === TokenType.Comma) {
-            this.diagnostics.raiseError(first, "Unexpected ','.");
-            this.stageNext();
-            this.parseParameters(handle);
-            return;
-        }
-        else if (first.type !== TokenType.Identifier) {
-            this.diagnostics.raiseError(first, "Expecting type or identifier.");
-            return;
-        }
-
+    private parseMethod(keywordToken: Token, visiblityToken?: Token) {
         const next = this.stageNext();
 
-        if (next.type === TokenType.Comma) {
-            handle.addParameter(first);
+        let node: MethodNode | null = null;
+
+        if (next.type === TokenType.Identifier) {
+            node = new MethodNode(keywordToken, next, visiblityToken);
+
             this.stageNext();
-            this.parseParameters(handle);
+            const parameters = this.parseParameters();
+
+            if (parameters !== null) {
+                node.setParameters(parameters);
+            }
         }
-        else if (next.type === TokenType.Identifier) {
-            if (this.isDataType(first.value)) {
-                handle.addParameterWithType(first, next);
-                this.stageNext();
-                this.parseParameters(handle);
+
+        return node;
+    }
+
+    private parseParameters() {
+        const lParen = this.staged;
+        const result = [];
+
+        if (lParen.type !== TokenType.Round_Paren_L) {
+            this.diagnostics.raiseError(lParen, "Expected '('");
+            return null;
+        }
+
+        let next = this.stageNext();
+
+        while (next.type === TokenType.Identifier) {
+            const commaOrIdent = this.stageNext();
+
+            if (commaOrIdent.type === TokenType.Comma) {
+                result.push(new ParameterNode(next));
+            }
+            else if (commaOrIdent.type === TokenType.Identifier) {
+                result.push(new ParameterNode(commaOrIdent, next));
+            }
+            else if (commaOrIdent.type === TokenType.Round_Paren_R) {
+                break;
             }
             else {
-                this.diagnostics.raiseError(first, "Expected type got " + first.value);
-                this.stageNext();
-                this.parseParameters(handle);
+                this.diagnostics.raiseError(commaOrIdent, `Expected ',' or identifier; got: ${commaOrIdent.value}`);
+                return null;
             }
+
+            next = this.stageNext();
         }
+
+        return result;
     }
 }

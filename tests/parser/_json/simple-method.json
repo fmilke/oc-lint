@@ -1,0 +1,12 @@
+{
+    "target": "public func Method() {}",
+    "expected": {
+        "value": "root",
+        "children": [{
+            "value": "Method",
+            "modifier": "public",
+            "parameters": [],
+            "children": []
+        }]
+    }
+}

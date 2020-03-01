@@ -2,16 +2,43 @@ import { TokenType, Token } from "../ifaces/ITokenizer";
 import { ASTNode } from "../model/ASTNode";
 import { precedenceRules, PrecedenceRule, PrecedencePosition } from "./Rules";
 
+type UnparsedCollection = Token[];
+
 export class PrecedenceParser {
 
-    private node: null | ASTNode = null;
+    private node: null | ExpressionNode = null;
     private rule: null | PrecedenceRule = null;
-    private operators: ASTNode[] = [];
-    constructor(private nodes: ASTNode[]) {
-        this.operators = nodes.filter(node => this.isOperatorToken(node.token));
+
+    private operators: ExpressionNode[] = [];
+    // constructor(private nodes: ASTNode[]) {
+    //     this.operators = nodes.filter(node => this.isOperatorToken(node.token));
+    // }
+
+    private stack: UnparsedCollection[] = [];
+    private current: ExpressionNode | null = null;
+
+    public startExpression() {
+        this.stack.push([]);
+    }
+    
+    public finalizeExpression() {
+        const collection = this.stack.pop();
+
+        this.parse(collection);
+    }
+
+    public addNode() {
+        
+    }
+
+    public addToStack(node: ExpressionNode) {
+        this.stack.push(node);
+        this.current = node;
     }
 
     public parse() {
+        this.operators = nodes.filter(node => this.isOperatorToken(node.token));
+        
         while (this.operators.length) {
             // Should not throw, should push diagonstic
             if (!this.tryGetNodeWithHighestPrecedence(this.operators))
@@ -112,4 +139,12 @@ export class PrecedenceParser {
                 return false;
         }
     }
+}
+
+class ExpressionNode {
+    constructor(public token: Token) {}
+}
+
+class SubexpressionNode extends ExpressionNode {
+    
 }
