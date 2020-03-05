@@ -1,150 +1,6 @@
-import { Token, TokenType } from "../ifaces/ITokenizer";
+import { Token } from "../ifaces/ITokenizer";
 
-// export class ASTNode {
-//     children: ASTNode[] = [];
-
-//     protected _parent: ASTNode | null = null;
-
-//     get parent() {
-//         return this._parent;
-//     }
-
-//     constructor(public token: Token) { }
-
-//     public appendChild(node: ASTNode) {
-//         this.children.push(node);
-
-//         if (node._parent !== null) {
-//             node._parent.removeChild(node);
-//         }
-
-//         node._parent = this;
-//     }
-
-//     public removeChild(node: ASTNode) {
-//         const idx = this.children.indexOf(node);
-//         if (idx === -1)
-//             throw new Error("Trying to remove node which is not a child");
-
-//         this.children.splice(idx, 1);
-//         node._parent = null;
-//     }
-
-//     public replaceChild(oldChild: ASTNode, newChild: ASTNode) {
-//         const idx = this.children.indexOf(oldChild);
-
-//         if (idx === -1)
-//             throw new Error("Trying to replace node which is not a child");
-
-//         this.children[idx] = newChild;
-//         oldChild._parent = null;
-//         newChild.removeSafelyFromParent();
-//         newChild._parent = this;
-//     }
-
-//     public removeSafelyFromParent() {
-//         if (this._parent !== null)
-//             this._parent.removeChild(this);
-//     }
-
-//     public getRoot(): ASTNode | null {
-//         return this._parent !== null ? this._parent.getRoot() : this;
-//     }
-
-//     static fromTokenWithChild(parentToken: Token, childToken: Token) {
-//         const parent = new ASTNode(parentToken);
-//         parent.appendChild(new ASTNode(childToken));
-//         return parent;
-//     }
-
-//     static fromToken(token: Token) {
-//         return new ASTNode(token);
-//     }
-
-//     static createRoot() {
-//         return new ASTNode(new Token(0, 0, TokenType.Root, "root"));
-//     }
-
-//     static createExpression() {
-//         return new ASTNode(new Token(0, 0, TokenType.Root, "expression"));
-//     }
-
-//     toTestObject(): any {
-//         return {
-//             value: this.token.value,
-//             children: this.children.map(child => child.toTestObject()),
-//         };
-//     }
-
-//     toDebugString(level: number = 0) {
-//         let str = `${'-'.padStart(level * 2, " ")}${this.token.value}\n`;
-//         for (let child of this.children) {
-//             str += child.toDebugString(level + 1);
-//         }
-
-//         return str;
-//     }
-// }
-
-// export class ASTLeaf {
-//     constructor(public token: Token) { }
-//     toTestObject(): any {
-//         return this.token.value;
-//     }
-// }
-
-// export class ASTParameterLeaf extends ASTLeaf {
-//     constructor(protected identToken: Token, private typeToken?: Token) {
-//         super(identToken);
-//     }
-
-//     toTestObject() {
-//         return {
-//             value: this.identToken.value,
-//             type: this.typeToken ? this.typeToken.value : null,
-//         }
-//     }
-// }
-
-// export class ASTMethodNode extends ASTNode {
-//     private parameters: ASTParameterLeaf[] = [];
-//     private modifier: ASTLeaf | null = null;
-//     constructor() {
-//         super(new Token(0, 0, TokenType.Identifier, ""));
-//     }
-
-//     setMethodName(token: Token) {
-//         this.token = token;
-//     }
-
-//     addParameter(identToken: Token) {
-//         this.parameters.push(new ASTParameterLeaf(identToken));
-//     }
-
-//     addParameterWithType(typeToken: Token, identToken: Token) {
-//         this.parameters.push(new ASTParameterLeaf(identToken, typeToken));
-//     }
-
-//     setModifier(modifierToken: Token | null) {
-//         this.modifier = modifierToken === null ? null : new ASTLeaf(modifierToken);
-//     }
-
-//     hasMethodName() {
-//         return this.token.value !== "";
-//     }
-
-//     toTestObject() {
-//         return {
-//             parameters: this.parameters.map(child => child.toTestObject()),
-//             modifier: this.modifier !== null ? this.modifier.toTestObject() : null,
-//             value: this.token.value,
-//             children: this.children.map(child => child.toTestObject()),
-//         }
-//     }
-// }
-
-
-export class ASTNode implements IASTNode {
+export class IdentifierNode implements IASTNode {
     constructor(public token: Token) { }
 
     toTestObject() {
@@ -153,10 +9,18 @@ export class ASTNode implements IASTNode {
 }
 
 export class ExpressionNode implements IASTNode {
-    constructor() { }
+    constructor(public expression: IASTNode | null = null) { }
 
     toTestObject() {
-        return "[expression]";
+        return this.expression === null ? null : this.expression.toTestObject();
+    }
+}
+
+export class ExpressionValueNode implements IASTNode {
+    constructor(public readonly identToken: Token) { }
+
+    toTestObject() {
+        return this.identToken.value;
     }
 }
 
@@ -192,21 +56,40 @@ export class RootNode extends ParentNode implements IASTNode {
     }
 }
 
-export class Operator1Node {
-    constructor() { }
+export class Operator1Node implements IASTNode {
+    constructor(public token: Token, public expression: IASTNode) { }
+
+    toTestObject() {
+        return {
+            operator: this.token.value,
+            expression: this.expression.toTestObject(),
+        }
+    }
 }
 
 export class Operator2Node {
+    constructor(
+        public token: Token,
+        public leftExpression: IASTNode,
+        public rightExpression: IASTNode
+    ) { }
 
+    toTestObject() {
+        return {
+            operator: this.token.value,
+            left: this.leftExpression.toTestObject(),
+            right: this.rightExpression.toTestObject(),
+        }
+    }
 }
 
 export class ModuleNode implements IASTNode {
-    keyword: ASTNode;
-    ident: ASTNode;
+    public readonly keyword: IdentifierNode;
+    public readonly ident: IdentifierNode;
 
     constructor(keywordToken: Token, identToken: Token) {
-        this.keyword = new ASTNode(keywordToken);
-        this.ident = new ASTNode(identToken);
+        this.keyword = new IdentifierNode(keywordToken);
+        this.ident = new IdentifierNode(identToken);
     }
 
     toTestObject() {
@@ -218,12 +101,12 @@ export class ModuleNode implements IASTNode {
 }
 
 export class ParameterNode implements IASTNode {
-    public identifier: ASTNode;
-    public type: ASTNode | null;
+    public readonly identifier: IdentifierNode;
+    public readonly type: IdentifierNode | null;
 
     constructor(identToken: Token, typeToken: Token | null = null) {
-        this.identifier = new ASTNode(identToken);
-        this.type = typeToken !== null ? new ASTNode(typeToken) : null;
+        this.identifier = new IdentifierNode(identToken);
+        this.type = typeToken !== null ? new IdentifierNode(typeToken) : null;
     }
 
     toTestObject() {
@@ -235,12 +118,12 @@ export class ParameterNode implements IASTNode {
 }
 
 export class GlobalVariableNode implements IASTNode {
-    public modifier: ASTNode;
-    public identifier: ASTNode;
+    public readonly modifier: IdentifierNode;
+    public readonly identifier: IdentifierNode;
 
     constructor(modifierToken: Token, identToken: Token) {
-        this.modifier = new ASTNode(modifierToken);
-        this.identifier = new ASTNode(identToken);
+        this.modifier = new IdentifierNode(modifierToken);
+        this.identifier = new IdentifierNode(identToken);
     }
 
     toTestObject() {
@@ -252,10 +135,11 @@ export class GlobalVariableNode implements IASTNode {
 }
 
 export class MethodNode implements IParentNode, IASTNode {
+    public readonly visibility: IdentifierNode | null = null;
+    public readonly keyword: IdentifierNode;
+    public readonly identifier: IdentifierNode;
+
     parameterList: ParameterNode[] = [];
-    visibility: ASTNode | null = null;
-    keyword: ASTNode;
-    identifier: ASTNode;
     children: IASTNode[] = [];
 
     constructor(
@@ -265,11 +149,11 @@ export class MethodNode implements IParentNode, IASTNode {
     ) {
 
         if (visibilityToken !== null) {
-            this.visibility = new ASTNode(visibilityToken);
+            this.visibility = new IdentifierNode(visibilityToken);
         }
 
-        this.keyword = new ASTNode(keywordToken);
-        this.identifier = new ASTNode(identToken);
+        this.keyword = new IdentifierNode(keywordToken);
+        this.identifier = new IdentifierNode(identToken);
     }
 
     setParameters(parameterList: ParameterNode[]) {
@@ -296,12 +180,19 @@ export class MethodNode implements IParentNode, IASTNode {
 }
 
 export class ReturnStatementNode implements IASTNode {
-    constructor(public keywordToken: Token, public expressionNode: ExpressionNode) { }
+    constructor(
+        public readonly keywordToken: Token,
+        public readonly expressionNode: ExpressionNode | null = null
+    ) { }
 
     toTestObject() {
         return {
             keyword: this.keywordToken.value,
-            expression: this.expressionNode.toTestObject(),
+            expression: this.expressionNode === null ? null : this.expressionNode.toTestObject(),
         }
     }
+}
+
+export class UnparsedOperatorNode {
+    constructor(public token: Token) { }
 }

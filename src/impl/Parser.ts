@@ -3,7 +3,8 @@ import { IParser } from "../ifaces/IParser";
 import { IDiagnosticsCache } from "../ifaces/IDiagnosticsCache";
 import { appContainer } from "../app";
 import { IASTStack } from "../ifaces/IASTStack";
-import { ModuleNode, RootNode, ReturnStatementNode, ExpressionNode, MethodNode, GlobalVariableNode, ParameterNode } from "../model/ASTNode";
+import { ModuleNode, RootNode, ReturnStatementNode, ExpressionNode, MethodNode, GlobalVariableNode, ParameterNode, Operator2Node } from "../model/ASTNode";
+import { ASTStack } from "./ASTBuilder";
 
 export class Parser implements IParser {
     private staged = new Token(0, 0, TokenType.Unimplemented, "");
@@ -108,7 +109,8 @@ export class Parser implements IParser {
     private parseReturn(keywordToken: Token) {
         const expressionNode = this.parseExpression();
 
-        const node = new ReturnStatementNode(keywordToken, expressionNode);
+        const node = expressionNode === null ? new ReturnStatementNode(keywordToken) :
+            new ReturnStatementNode(keywordToken, expressionNode);
 
         const maybeSemicolon = this.staged;
 
@@ -119,57 +121,51 @@ export class Parser implements IParser {
         return node;
     }
 
-    private parseExpression() {
+    private parseExpression(cancellationToken = new ExpressionCancellationToken()) {
+
+        let token = this.staged;
+        let level = 0;
+        let parts = [];
+
+        while (level >= 0 && !this.isExpressionDelimiter(token.type)) {
+            switch (token.type) {
+                case TokenType.Round_Paren_L:
+                    let subExpression = this.parseExpression(cancellationToken);
+                    if (cancellationToken.isCancelled())
+                        return null;
+                    else
+                        parts.push(subExpression);
+                    level++;
+                    break;
+                case TokenType.Round_Paren_R:
+                    if (level === 0) {
+                        this.diagnostics.raiseError(token, "Unexpected ')'. No matching opening bracket.");
+                        return null;
+                    }
+                    else {
+                        level--;
+                    }
+                case TokenType.ArithmicOperator:
+                case TokenType.NilCaseOperator:
+                case TokenType.AssignmentOperator:
+                case TokenType.BitwiseOperator:
+                case TokenType.LogicalOperator:
+                    // parts.push(new UnparsedOperator(token));
+                    break;
+                default:
+                    this.diagnostics.raiseError(token, "Unexpected token.");
+                    return null;
+            }
+
+            token = this.stageNext();
+        }
+
+        if (level > 0) {
+            this.diagnostics.raiseError(token, "Unexpected end of expression.");
+        }
+
         return new ExpressionNode();
     }
-
-    // parsing of expression is done by
-    // consuming all tokens until a delimiter is reached
-    // and then perform precedence parsing on these tokens
-    // private _parseExpression() {
-    //     let current = this.staged;
-    //     let level = 0;
-
-    //     this.builder.startExpression();
-
-    //     while (level >= 0 && !this.isExpressionDelimiter(current.type)) {
-    //         let next = this.stageNext();
-    //         switch (current.type) {
-    //             case TokenType.ArithmicOperator:
-    //             case TokenType.NilCaseOperator:
-    //             case TokenType.AssignmentOperator:
-    //             case TokenType.BitwiseOperator:
-    //             case TokenType.LogicalOperator:
-    //                 this.builder.addNode(current);
-    //                 break;
-    //             case TokenType.Identifier:
-    //                 this.builder.addNode(current);
-    //                 break;
-    //             case TokenType.Round_Paren_L:
-    //                 this.builder.startExpression();
-    //                 level++;
-    //                 break;
-    //             case TokenType.Round_Paren_R:
-    //                 if (level > 0) {
-    //                     this.builder.finalizeExpression();
-    //                 }
-    //                 level--;
-    //             break;
-    //             // case TokenType.Semicolon:
-    //             // case TokenType.Comma:
-    //             // case TokenType.EOF:
-    //             //     break;
-    //             default:
-    //                 this.diagnostics.raiseError(next, "Unexpected token: " + next.value);
-    //                 this.builder.abortExpression();
-    //                 return;
-    //         }
-
-    //         current = next;
-    //     }
-
-    //     this.builder.finalizeExpression();
-    // }
 
     private stageNext() {
         this.staged = this.tokenizer.nextToken();
@@ -270,5 +266,17 @@ export class Parser implements IParser {
         }
 
         return result;
+    }
+}
+
+class ExpressionCancellationToken {
+    private _cancelled = false;
+
+    cancel() {
+        this._cancelled = true;
+    }
+
+    isCancelled() {
+        return this._cancelled;
     }
 }

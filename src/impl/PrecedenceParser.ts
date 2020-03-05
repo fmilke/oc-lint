@@ -1,107 +1,116 @@
-import { TokenType, Token } from "../ifaces/ITokenizer";
-import { ASTNode } from "../model/ASTNode";
+import { Token } from "../ifaces/ITokenizer";
 import { precedenceRules, PrecedenceRule, PrecedencePosition } from "./Rules";
+import { ExpressionNode, UnparsedOperatorNode, IASTNode, Operator1Node, Operator2Node, OperatorNode } from "../model/ASTNode";
+import { appContainer } from "../app";
+import { IDiagnosticsCache } from "../ifaces/IDiagnosticsCache";
 
-type UnparsedCollection = Token[];
+type UnparsedNodeCollection = (UnparsedOperatorNode | IASTNode)[];
 
 export class PrecedenceParser {
 
-    private node: null | ExpressionNode = null;
+    private node: null | UnparsedOperatorNode = null;
     private rule: null | PrecedenceRule = null;
+    private recentOperator: OperatorNode | null = null;
 
-    private operators: ExpressionNode[] = [];
-    // constructor(private nodes: ASTNode[]) {
-    //     this.operators = nodes.filter(node => this.isOperatorToken(node.token));
-    // }
+    private diagonstics = appContainer.resolve<IDiagnosticsCache>("DiagnosticsCache");
 
-    private stack: UnparsedCollection[] = [];
-    private current: ExpressionNode | null = null;
-
-    public startExpression() {
-        this.stack.push([]);
-    }
-    
-    public finalizeExpression() {
-        const collection = this.stack.pop();
-
-        this.parse(collection);
-    }
-
-    public addNode() {
-        
-    }
-
-    public addToStack(node: ExpressionNode) {
-        this.stack.push(node);
-        this.current = node;
-    }
+    constructor(private parts: UnparsedNodeCollection) { }
 
     public parse() {
-        this.operators = nodes.filter(node => this.isOperatorToken(node.token));
-        
-        while (this.operators.length) {
-            // Should not throw, should push diagonstic
-            if (!this.tryGetNodeWithHighestPrecedence(this.operators))
-                throw new Error("Could not get node with precedence");
+        let operatorCount = this.parts.reduce(
+            (prev, node) => node instanceof UnparsedOperatorNode ? prev + 1 : prev,
+            0
+        );
 
-            if (this.node === null || this.rule === null) {
-                throw new Error("Failed");
-            }
+        while (operatorCount > 0) {
 
-            this.applyRule(this.node, this.rule);
+            if (!this.tryGetNodeWithHighestPrecedence(this.parts))
+                return null;
+
+            if (!this.tryApplyRule())
+                return null;
+
+            operatorCount--;
         }
+
+        return this.recentOperator === null ? null : new ExpressionNode(this.recentOperator);
     }
 
-    private applyRule(node: ASTNode, rule: PrecedenceRule) {
-        const idx = this.nodes.indexOf(node);
+    private tryApplyRule(): boolean {
+        if (this.node === null || this.rule === null)
+            throw Error("Trying to apply rule, while either node or rule is missing");
 
-        if (rule.parameters === 1) {
-            if (rule.position === PrecedencePosition.Prefix) {
-                if (idx === this.nodes.length - 1) {
-                    // provide diagnostics
-                    throw new Error("Error1");
-                }
-                else {
-                    node.appendChild(this.nodes[idx + 1]);
-                    this.nodes.splice(idx + 1, 1);
+        const idx = this.parts.indexOf(this.node);
 
+        if (this.rule.parameters === 1) {
+            if (this.rule.position === PrecedencePosition.Prefix) {
+                if (idx >= this.parts.length - 1) {
+                    const right = this.parts[idx + 1];
+
+                    if (right instanceof UnparsedOperatorNode) {
+                        this.diagonstics.raiseError(this.node.token, "Expression expected.");
+                        return false;
+                    }
+
+                    const operatorNode = new Operator1Node(this.node.token, right);
+                    this.parts.splice(idx, 2, operatorNode);
+                    this.recentOperator = operatorNode;
                 }
             }
             else {
-                if (idx === 0) {
-                    // provide diagnostics
-                    throw new Error("Error2");
-                }
-                else {
-                    node.appendChild(this.nodes[idx - 1]);
-                    this.nodes.splice(idx - 1, 1);
+                if (idx < 1) {
+                    const left = this.parts[idx - 1];
+
+                    if (left instanceof UnparsedOperatorNode) {
+                        this.diagonstics.raiseError(this.node.token, "Expression expected");
+                        return false;
+                    }
+
+                    const operatorNode = new Operator1Node(this.node.token, left);
+                    this.parts.splice(idx - 1, 2, operatorNode);
+                    this.recentOperator = operatorNode;
                 }
             }
         }
         else {
-            if (idx === 0 || idx === this.nodes.length - 1) {
-                // provide diagnostics
-                throw new Error("Error3");
+            if (idx < 1) {
+                this.diagonstics.raiseError(this.node.token, "Missing left expression.");
+                return false;
+            }
+            else if (idx >= this.parts.length - 1) {
+                this.diagonstics.raiseError(this.node.token, "Missing right expression.");
+                return false;
             }
             else {
-                node.appendChild(this.nodes[idx - 1]);
-                node.appendChild(this.nodes[idx + 1]);
-                this.nodes.splice(idx - 1, 3, node);
+                const left = this.parts[idx - 1];
+                const right = this.parts[idx + 1];
+
+                if (left instanceof UnparsedOperatorNode) {
+                    this.diagonstics.raiseError(left.token, "Expression expected.");
+                    return false;
+                }
+
+                if (right instanceof UnparsedOperatorNode) {
+                    this.diagonstics.raiseError(right.token, "Expression expected");
+                    return false;
+                }
+
+                const operatorNode = new Operator2Node(this.node.token, left, right);
+                this.parts.splice(idx - 1, 3, operatorNode);
+                this.recentOperator = operatorNode;
             }
         }
-
-        this.operators.splice(this.operators.indexOf(node), 1);
 
         return true;
     }
 
-    private tryGetNodeWithHighestPrecedence(nodes: ASTNode[]) {
+    private tryGetNodeWithHighestPrecedence(nodes: UnparsedNodeCollection) {
         let maxOperator = null;
         let maxPriority = 0;
         let maxRule = null;
 
         for (let node of nodes) {
-            if (this.isOperatorToken(node.token)) {
+            if (node instanceof UnparsedOperatorNode) {
                 const rule = this.getOperatorPrecedence(node.token);
 
                 if (rule.priority > maxPriority) {
@@ -126,25 +135,4 @@ export class PrecedenceParser {
 
         return rule;
     }
-
-    private isOperatorToken(token: Token) {
-        switch (token.type) {
-            case TokenType.ArithmicOperator:
-            case TokenType.NilCaseOperator:
-            case TokenType.AssignmentOperator:
-            case TokenType.BitwiseOperator:
-            case TokenType.LogicalOperator:
-                return true;
-            default:
-                return false;
-        }
-    }
-}
-
-class ExpressionNode {
-    constructor(public token: Token) {}
-}
-
-class SubexpressionNode extends ExpressionNode {
-    
 }

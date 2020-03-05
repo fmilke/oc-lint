@@ -1,0 +1,30 @@
+{
+    "target": "func Add(int a, int b) { return a + b; }",
+    "expected": {
+        "children": [
+            {
+                "keyword": "func",
+                "identifier": "Add",
+                "visibility": null,
+                "parameters": [
+                    {
+                        "type": "int",
+                        "identifier": "a"
+                    },
+                    {
+                        "type": "int",
+                        "identifier": "b"
+                    }
+                ],
+                "children": [{
+                    "identifier": "return",
+                    "expression": {
+                        "operator": "+",
+                        "left": "a",
+                        "right": "b"
+                    }
+                }]
+            }
+        ]
+    }
+}
