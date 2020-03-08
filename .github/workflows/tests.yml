@@ -22,6 +22,3 @@ jobs:
     
     - name: Npm install
       run: npm install
-    
-    - name: Run tests
-      run: ./node_modules/mocha/bin/_mocha -u bdd -r ts-node/register --timeout 99999 --colors ./tests/**/*.test.ts
