@@ -41,10 +41,27 @@ export class PrecedenceParser {
             throw Error("Trying to apply rule, while either node or rule is missing");
 
         const idx = this.parts.indexOf(this.node);
+        const idxLast = this.parts.length - 1;
 
         if (this.rule.parameters === 1) {
-            if (this.rule.position === PrecedencePosition.Prefix) {
-                if (idx >= this.parts.length - 1) {
+            let position = this.rule.position;
+
+            // Some rules (e.g. ++) can be postfix or prefix
+            // Here we try to decide which of these
+            if (position === PrecedencePosition.PrefixXorPostfix) {
+                if (idx === 0)
+                    position = PrecedencePosition.Prefix;
+                else if (idx === idxLast) {
+                    position = PrecedencePosition.Postfix;
+                }
+                else {
+                    position = this.parts[idx - 1] instanceof UnparsedOperatorNode ?
+                        PrecedencePosition.Prefix : PrecedencePosition.Postfix;
+                }
+            }
+
+            if (position === PrecedencePosition.Prefix) {
+                if (idx < idxLast) {
                     const right = this.parts[idx + 1];
 
                     if (right instanceof UnparsedOperatorNode) {
@@ -56,9 +73,17 @@ export class PrecedenceParser {
                     this.parts.splice(idx, 2, operatorNode);
                     this.recentOperator = operatorNode;
                 }
+                else {
+                    this.diagonstics.raiseError(this.node.token, "Right-hand expression expected.");
+                    return false;
+                }
             }
             else {
                 if (idx < 1) {
+                    this.diagonstics.raiseError(this.node.token, "Left-hand expression expected.");
+                    return false;
+                }
+                else {
                     const left = this.parts[idx - 1];
 
                     if (left instanceof UnparsedOperatorNode) {

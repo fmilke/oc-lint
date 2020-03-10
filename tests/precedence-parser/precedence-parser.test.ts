@@ -20,4 +20,69 @@ describe('Precedence Parser', () => {
             right: "b",
         });
     });
+
+    it(`should parse 'a + b * c' by precedence`, () => {
+        const nodes: any = [
+            new IdentifierNode(new Token(0, 0, TokenType.ArithmicOperator, "a")),
+            new UnparsedOperatorNode(new Token(0, 0, TokenType.ArithmicOperator, "+")),
+            new IdentifierNode(new Token(0, 0, TokenType.ArithmicOperator, "b")),
+            new UnparsedOperatorNode(new Token(0, 0, TokenType.ArithmicOperator, "*")),
+            new IdentifierNode(new Token(0, 0, TokenType.ArithmicOperator, "c")),
+        ];
+
+        const parser = new PrecedenceParser(nodes);
+        const result = parser.parse() || new IdentifierNode(new Token(0, 0, TokenType.Identifier, "failed"));
+
+        expect(result.toTestObject()).to.eql({
+            operator: "+",
+            left: "a",
+            right: {
+                operator: "*",
+                left: "b",
+                right: "c",
+            },
+        });
+    });
+
+    it(`should parse '++a + b' by precedence`, () => {
+        const nodes: any = [
+            new UnparsedOperatorNode(new Token(0, 0, TokenType.ArithmicOperator, "++")),
+            new IdentifierNode(new Token(0, 0, TokenType.ArithmicOperator, "a")),
+            new UnparsedOperatorNode(new Token(0, 0, TokenType.ArithmicOperator, "+")),
+            new IdentifierNode(new Token(0, 0, TokenType.ArithmicOperator, "b")),
+        ];
+
+        const parser = new PrecedenceParser(nodes);
+        const result = parser.parse() || new IdentifierNode(new Token(0, 0, TokenType.Identifier, "failed"));
+
+        expect(result.toTestObject()).to.eql({
+            operator: "+",
+            left: {
+                operator: "++",
+                expression: "a",
+            },
+            right: "b",
+        });
+    });
+
+    it(`should parse 'a + --b' by precedence`, () => {
+        const nodes: any = [
+            new IdentifierNode(new Token(0, 0, TokenType.ArithmicOperator, "a")),
+            new UnparsedOperatorNode(new Token(0, 0, TokenType.ArithmicOperator, "+")),
+            new UnparsedOperatorNode(new Token(0, 0, TokenType.ArithmicOperator, "--")),
+            new IdentifierNode(new Token(0, 0, TokenType.ArithmicOperator, "b")),
+        ];
+
+        const parser = new PrecedenceParser(nodes);
+        const result = parser.parse() || new IdentifierNode(new Token(0, 0, TokenType.Identifier, "failed"));
+
+        expect(result.toTestObject()).to.eql({
+            operator: "+",
+            left: "a",
+            right: {
+                operator: "--",
+                expression: "b",
+            },
+        });
+    });
 });

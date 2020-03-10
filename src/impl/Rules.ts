@@ -2,6 +2,7 @@
 export enum PrecedencePosition {
     Postfix,
     Prefix,
+    PrefixXorPostfix,
 }
 
 export interface PrecedenceRule {
@@ -126,9 +127,21 @@ export const precedenceRules: PrecedenceRule[] = [
         priority: 3,
         value: "??",
     },
+    {
+        parameters: 1,
+        position: PrecedencePosition.PrefixXorPostfix,
+        priority: 15,
+        value: "++",
+    },
+    {
+        parameters: 1,
+        position: PrecedencePosition.PrefixXorPostfix,
+        priority: 15,
+        value: "--",
+    },
 ];
 
-// ++	Increases the value of the following variable by 1.	prefix	reference, reference
+// 15   ++	Increases the value of the following variable by 1.	prefix	reference, reference
 // 15	--	Decreases the value of the following variable by 1.	prefix	reference, reference
 // 15	~	Bitwise negation of the following value.	prefix	int, int
 // 15	!	Logical negation of the following value.	prefix	bool, bool
