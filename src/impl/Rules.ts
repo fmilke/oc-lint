@@ -139,16 +139,22 @@ export const precedenceRules: PrecedenceRule[] = [
         priority: 15,
         value: "--",
     },
+    {
+        parameters: 1,
+        position: PrecedencePosition.Prefix,
+        priority: 15,
+        value: "~",
+    },
+    {
+        parameters: 1,
+        position: PrecedencePosition.Prefix,
+        priority: 15,
+        value: "!",
+    },
 ];
 
-// 15   ++	Increases the value of the following variable by 1.	prefix	reference, reference
-// 15	--	Decreases the value of the following variable by 1.	prefix	reference, reference
-// 15	~	Bitwise negation of the following value.	prefix	int, int
-// 15	!	Logical negation of the following value.	prefix	bool, bool
 // 15	+	no effect (compatibility for terms such as "+5")	prefix	int, int
 // 15	-	Yields the reciprocal of the following value.	prefix	int, int
-// 15	++	Increases the value of the preceding variable by 1.	postfix (only one parameter)	int, reference
-// 15	--	Decreases the value of the preceding variable by 1.	postfix (only one parameter)	int, reference
 // 2r	*=	Multiplies the preceeding variables by the following value.	postfix	reference, reference/int
 // 2r	/=	Divides the preceeding variable by the following value.	postfix	reference, reference/int
 // 2r	%=	Sets the preceeding variable to the remainder of the devision of that variable by the following value.	postfix	reference, reference/int
